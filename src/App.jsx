@@ -1,11 +1,11 @@
 import { useState } from 'react';
+import Formulario from "./front/Formulario";
 function App() {
-
+  
   return (
-      
-      <div>
-        
-      </div>
+
+ <Formulario />
+ 
   )
 }
 
