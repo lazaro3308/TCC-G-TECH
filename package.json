@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --root client --config vite.config.js",
-    "build": "vite build --root client --config vite.config.js",
-    "preview": "vite preview --root client --config vite.config.js"
+    "dev": "npm --prefix client run dev",
+    "build": "npm --prefix client run build",
+    "preview": "npm --prefix client run preview"
   }
 }
