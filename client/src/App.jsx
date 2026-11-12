@@ -1,5 +1,5 @@
-import React from 'react';
-import { useEffect, useState } from 'react';
+
+import React, { useEffect, useState } from 'react';
 
 import {
   BrowserRouter,
@@ -131,7 +131,6 @@ function AppContent() {
 
   async function addTicket(data) {
     const ticket = await createTicket(data, user);
-
     setTickets(current => [ticket, ...current]);
   }
 
