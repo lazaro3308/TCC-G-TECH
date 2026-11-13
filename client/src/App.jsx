@@ -8,7 +8,7 @@ import {
   Routes,
   useNavigate
 } from 'react-router-dom';
-
+import SupportDashboard from '../../frontend_suporte/SupportDashboard.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import Topbar from './components/Topbar.jsx';
 
@@ -54,42 +54,58 @@ function ProtectedLayout({
         />
 
         <div className="page-content">
-          <Routes>
-            <Route
-              path="/painel"
-              element={<Dashboard tickets={tickets} user={user} />}
-            />
+     
+<Routes>
 
-            <Route
-              path="/chamados"
-              element={<Tickets tickets={tickets} />}
-            />
+  {/* Dashboard do suporte */}
+  <Route
+    path="/suporte"
+    element={<SupportDashboard />}
+  />
 
-            <Route
-              path="/chamados/:id"
-              element={<TicketDetails tickets={tickets} />}
-            />
+  {/* Dashboard do cliente */}
+  <Route
+    path="/painel"
+    element={<Dashboard tickets={tickets} user={user} />}
+  />
 
-            <Route
-              path="/novo-chamado"
-              element={<NewTicket onCreate={onCreate} />}
-            />
+  {/* Lista de chamados */}
+  <Route
+    path="/chamados"
+    element={<Tickets tickets={tickets} />}
+  />
 
-            <Route
-              path="/perfil"
-              element={
-                <Profile
-                  user={user}
-                  onSave={onSaveProfile}
-                />
-              }
-            />
+  {/* Detalhes do chamado */}
+  <Route
+    path="/chamados/:id"
+    element={<TicketDetails tickets={tickets} />}
+  />
 
-            <Route
-              path="*"
-              element={<Navigate to="/painel" replace />}
-            />
-          </Routes>
+  {/* Novo chamado */}
+  <Route
+    path="/novo-chamado"
+    element={<NewTicket onCreate={onCreate} />}
+  />
+
+  {/* Perfil */}
+  <Route
+    path="/perfil"
+    element={
+      <Profile
+        user={user}
+        onSave={onSaveProfile}
+      />
+    }
+  />
+
+  {/* Rota padrão - sempre por último */}
+  <Route
+    path="*"
+    element={<Navigate to="/painel" replace />}
+  />
+
+</Routes>
+
         </div>
 
         <footer className="app-footer">

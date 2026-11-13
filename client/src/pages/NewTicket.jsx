@@ -1,8 +1,11 @@
 import React from 'react';
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { ArrowLeft,Paperclip,Send,ShieldCheck } from "lucide-react";
+
 export default function NewTicket({onCreate}) {
+  
   const navigate=useNavigate(); const [form,setForm]=useState({title:"",category:"",priority:"Normal",description:""}); const [error,setError]=useState(""); const [loading,setLoading]=useState(false);
   const change=e=>setForm({...form,[e.target.name]:e.target.value});
   async function submit(e) {

@@ -69,25 +69,35 @@ export async function createTicket(data, user = {}) {
   };
 
   try {
-    const response = await fetch(`${API_URL}/chamados`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        empresa: user.company || user.empresa || "Cliente G-TECH",
-        email: user.email || "",
-        problema: `${ticket.title}\nCategoria: ${ticket.category}\nPrioridade: ${ticket.priority}\n\n${ticket.description}`
-      })
-    });
+   
+const response = await fetch(`${API_URL}/chamados`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    title: ticket.title,
+    category: ticket.category,
+    priority: ticket.priority,
+    description: ticket.description,
+    empresa: user.company || user.empresa || "Cliente G-TECH",
+    email: user.email || ""
+  })
+});
 
-    if (!response.ok) {
-      throw new Error("Não foi possível registrar o chamado.");
-    }
+if (!response.ok) {
+  throw new Error("Erro ao enviar chamado para o servidor.");
+}
 
-    ticket.apiSynced = true;
+const resultado = await response.json();
+
+console.log("Resposta do servidor:", resultado);
+
+ticket.apiSynced = true;
+
   } catch (error) {
-    console.error("Falha ao sincronizar chamado com a API:", error);
+   console.error("Falha na API:", error);
+    throw error;
   }
 
   const tickets = getTickets();
