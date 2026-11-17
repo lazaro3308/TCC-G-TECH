@@ -8,7 +8,7 @@ import {
   Routes,
   useNavigate
 } from 'react-router-dom';
-import SupportDashboard from '../../frontend_suporte/SupportDashboard.jsx';
+
 import Sidebar from './components/Sidebar.jsx';
 import Topbar from './components/Topbar.jsx';
 
@@ -54,58 +54,42 @@ function ProtectedLayout({
         />
 
         <div className="page-content">
-     
-<Routes>
+          <Routes>
+            <Route
+              path="/painel"
+              element={<Dashboard tickets={tickets} user={user} />}
+            />
 
-  {/* Dashboard do suporte */}
-  <Route
-    path="/suporte"
-    element={<SupportDashboard />}
-  />
+            <Route
+              path="/chamados"
+              element={<Tickets tickets={tickets} />}
+            />
 
-  {/* Dashboard do cliente */}
-  <Route
-    path="/painel"
-    element={<Dashboard tickets={tickets} user={user} />}
-  />
+            <Route
+              path="/chamados/:id"
+              element={<TicketDetails tickets={tickets} />}
+            />
 
-  {/* Lista de chamados */}
-  <Route
-    path="/chamados"
-    element={<Tickets tickets={tickets} />}
-  />
+            <Route
+              path="/novo-chamado"
+              element={<NewTicket onCreate={onCreate} />}
+            />
 
-  {/* Detalhes do chamado */}
-  <Route
-    path="/chamados/:id"
-    element={<TicketDetails tickets={tickets} />}
-  />
+            <Route
+              path="/perfil"
+              element={
+                <Profile
+                  user={user}
+                  onSave={onSaveProfile}
+                />
+              }
+            />
 
-  {/* Novo chamado */}
-  <Route
-    path="/novo-chamado"
-    element={<NewTicket onCreate={onCreate} />}
-  />
-
-  {/* Perfil */}
-  <Route
-    path="/perfil"
-    element={
-      <Profile
-        user={user}
-        onSave={onSaveProfile}
-      />
-    }
-  />
-
-  {/* Rota padrão - sempre por último */}
-  <Route
-    path="*"
-    element={<Navigate to="/painel" replace />}
-  />
-
-</Routes>
-
+            <Route
+              path="*"
+              element={<Navigate to="/painel" replace />}
+            />
+          </Routes>
         </div>
 
         <footer className="app-footer">
