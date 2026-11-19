@@ -1,21 +1,46 @@
 # Autenticação e painel técnico — G-TECH
 
-## Perfis
+**Versão:** 1.1  
+**Situação:** documentação da implementação atual.
 
-- **Cliente:** cria a própria conta, abre chamados e consulta somente os próprios registros.
-- **Técnico:** entra por conta provisionada previamente; consulta a fila geral e atualiza status/resposta dos chamados.
-- O cadastro público sempre cria perfil `cliente`. Não existe opção de elevar o próprio perfil.
+## 1. Perfis disponíveis
 
-## Preparar o banco
+- **Cliente:** cria a própria conta pelo cadastro público, abre chamados e consulta somente os próprios registros.
+- **Técnico:** acessa com conta provisionada previamente, consulta a fila de chamados e atualiza status e resposta técnica.
 
-1. Inicie MySQL pelo XAMPP.
-2. Abra phpMyAdmin e importe `server/database/schema.sql`.
-3. Copie `server/.env.example` para `server/.env`.
-4. Preencha conexão MySQL e gere um segredo JWT aleatório com pelo menos 32 caracteres. Não envie `.env) ao GitHub.
+O cadastro público sempre cria o perfil `cliente`. Não há opção para o usuário elevar o próprio perfil. Perfis de administrador e funcionário ainda fazem parte do planejamento, não da autenticação atualmente implementada.
 
-## Instalar e iniciar a API
+## 2. Preparar o banco
 
-No terminal:
+1. Inicie o MySQL pelo XAMPP.
+2. Abra o phpMyAdmin.
+3. Importe `server/database/schema.sql`.
+4. Confirme a criação do banco `g_tech_suporte` e das tabelas `usuarios`, `chamados` e `historico_chamados`.
+
+## 3. Configurar variáveis de ambiente
+
+Na pasta `server`:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Configure as variáveis no arquivo `.env`:
+
+| Variável | Finalidade |
+|---|---|
+| `PORT` | Porta da API (padrão 3000) |
+| `NODE_ENV` | Ambiente de execução |
+| `DB_HOST`, `DB_PORT` | Endereço e porta do MySQL |
+| `DB_USER`, `DB_PASSWORD` | Credenciais do banco |
+| `DB_NAME` | Banco `g_tech_suporte` |
+| `JWT_SECRET` | Segredo aleatório com pelo menos 32 caracteres |
+| `CLIENT_ORIGIN` | Origem exata do front-end |
+| `COOKIE_SECURE` | Ativa cookie Secure quando aplicável |
+
+Não publique o arquivo `.env`, não envie seu conteúdo em conversas e não reutilize o segredo em outros projetos.
+
+## 4. Instalar e iniciar a API
 
 ```powershell
 cd server
@@ -23,20 +48,20 @@ npm install
 npm run dev
 ```
 
-A API inicia em `http://localhost:3000`. A rota `/health` verifica disponibilidade.
+A API inicia em `http://localhost:3000`. A rota `GET /health` verifica a disponibilidade.
 
-## Criar o primeiro técnico
+## 5. Criar uma conta técnica
 
-Com banco e variáveis configurados:
+Com o banco e as variáveis configurados:
 
 ```powershell
 cd server
 npm run create:technician
 ```
 
-O script solicita nome, e-mail e senha (mínimo 12 caracteres), gera hash com bcrypt e grava o perfil `tecnico`. Não há senha padrão no repositório.
+O script solicita nome, e-mail e senha (mínimo de 12 caracteres), gera o hash com bcrypt e cria uma conta com perfil `tecnico`. Não existe senha padrão no repositório.
 
-## Iniciar o frontend
+## 6. Iniciar o front-end
 
 Em outro terminal:
 
@@ -48,30 +73,48 @@ npm run dev
 
 Se o Vite escolher uma porta diferente de 5173, atualize `CLIENT_ORIGIN` no `server/.env` para a origem exata exibida pelo Vite e reinicie a API.
 
-## Rotas principais
+## 7. Rotas disponíveis
 
-| Método | Rota | Acesso |
+| Método | Rota | Acesso / finalidade |
 |---|---|---|
+| GET | `/health` | Público — verificação da API |
 | POST | `/auth/register` | Público — cria somente cliente |
-| POST | `/auth/login` | Público — exige perfil selecionado |
-| POST | `/auth/logout` | Sessão |
-| GET | `/auth/me` | Sessão |
-| POST | `/chamados` | Cliente |
-| GET | `/chamados` | Cliente (próprios) ou técnico (fila) |
-| PATCH | `/chamados/:id` | Técnico |
-| GET | `/tecnico/resumo` | Técnico |
+| POST | `/auth/login` | Público — autentica conforme perfil informado |
+| POST | `/auth/logout` | Encerra a sessão |
+| GET | `/auth/me` | Sessão autenticada |
+| POST | `/chamados` | Cliente — abre chamado |
+| GET | `/chamados` | Cliente — próprios chamados; técnico — fila geral |
+| PATCH | `/chamados/:id` | Técnico — atualiza status e resposta |
+| GET | `/tecnico/resumo` | Técnico — indicadores |
 
-## Controles implementados
+## 8. Fluxo de acompanhamento
 
-- Senhas armazenadas com bcrypt (12 rounds).
-- Sessão JWT em cookie `HttpOnly`, `SameSite=Lax` e `Secure` em produção.
-- Verificação de perfil no servidor, não apenas na interface.
+Após criar um chamado, o cliente é direcionado à tela de confirmação, que apresenta o protocolo e o estado atual. A aplicação consulta a API periodicamente, a cada 15 segundos, enquanto a tela/lista está aberta. O cliente também pode abrir os detalhes do chamado para consultar a resposta técnica.
+
+Os status atualmente utilizados pelo banco e pela interface são:
+
+- `Aguardando atendimento`
+- `Em atendimento`
+- `Aguardando cliente`
+- `Resolvido`
+- `Cancelado`
+
+O polling não é uma notificação push nem uma conexão em tempo real. A atualização depende da página permanecer aberta e conseguir consultar a API.
+
+## 9. Controles implementados
+
+- Hash de senha com bcryptjs (12 rounds).
+- JWT armazenado em cookie `HttpOnly`, com `SameSite=Lax` e opção `Secure` em produção.
+- Verificação de perfil no servidor.
 - Consultas SQL parametrizadas.
-- Helmet, CORS com origem configurada, limite de requisições e limite de payload.
+- Helmet e CORS com origem configurada.
+- Limitação de requisições e limite de payload JSON.
 - Validação de dados no servidor.
-- Histórico de alterações de status/resposta.
-- Variáveis sensíveis fora do versionamento.
+- Registro de abertura e alterações de status/resposta no histórico.
+- Variáveis sensíveis mantidas fora do versionamento.
 
-## Antes de publicar em produção
+## 10. Pendências antes de produção
 
-A implementação é uma base de segurança, não uma garantia de “segurança extrema”. Antes de expor à internet, configure HTTPS e `COOKIE_SECURE=true`, segredo forte exclusivo do ambiente, usuário MySQL com privilégios mínimos, backup, monitoramento e testes de autorização/CSRF. Planeje MFA para técnicos, revogação de sessões no servidor, recuperação segura de senha, trilha de auditoria ampliada e testes automatizados. Não reutilize senhas de demonstração.
+A implementação é uma base de segurança, não uma garantia de segurança extrema ou certificação. Antes de expor o sistema à internet, configure HTTPS e `COOKIE_SECURE=true`, segredo forte exclusivo do ambiente, usuário MySQL com privilégios mínimos, backups, monitoramento e testes de autorização/CSRF.
+
+Também devem ser planejados MFA para técnicos, revogação de sessões no servidor, recuperação segura de senha, trilha de auditoria ampliada e testes automatizados. A proteção de origem atualmente existente é uma mitigação básica e não substitui uma estratégia CSRF completa.
