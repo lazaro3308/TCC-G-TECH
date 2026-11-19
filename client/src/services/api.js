@@ -3,11 +3,11 @@ export async function apiRequest(path,options={}){const response=await fetch(API
 export const getSession=()=>{try{return JSON.parse(sessionStorage.getItem("gtech_user"))}catch{return null}};
 export const saveSession=user=>sessionStorage.setItem("gtech_user",JSON.stringify(user));
 export const clearSession=()=>sessionStorage.removeItem("gtech_user");
-export async function login(email,senha,perfil){const data=await apiRequest("/auth/login",{method:"POST",body:JSON.stringify({email,senha,perfil})});saveSession(data.usuario);return data.usuario}
-export async function registerClient(data){const result=await apiRequest("/auth/register",{method:"POST",body:JSON.stringify(data)});saveSession(result.usuario);return result.usuario}
-export async function restoreSession(){const data=await apiRequest("/auth/me");saveSession(data.usuario);return data.usuario}
+export async function login(email,senha,perfil){const data=await apiRequest("/auth/login",{method:"POST",body:JSON.stringify({email,senha,perfil})});const user={...data.usuario,name:data.usuario.nome};saveSession(user);return user}
+export async function registerClient(data){const result=await apiRequest("/auth/register",{method:"POST",body:JSON.stringify(data)});const user={...result.usuario,name:result.usuario.nome};saveSession(user);return user}
+export async function restoreSession(){const data=await apiRequest("/auth/me");const user={...data.usuario,name:data.usuario.nome};saveSession(user);return user}
 export async function logout(){try{await apiRequest("/auth/logout",{method:"POST"})}finally{clearSession()}}
 export async function getTickets(){const rows=(await apiRequest("/chamados")).chamados||[];return rows.map(t=>({...t,id:t.codigo||String(t.id),title:t.titulo,description:t.descricao,date:t.criado_em?String(t.criado_em).slice(0,10):"",updates:0}))}
-export async function createTicket(data){return (await apiRequest("/chamados",{method:"POST",body:JSON.stringify(data)})).chamado}
+export async function createTicket(data){const t=(await apiRequest("/chamados",{method:"POST",body:JSON.stringify({titulo:data.title,categoria:data.category,prioridade:data.priority,descricao:data.description})})).chamado;return {...t,id:t.codigo||String(t.id),title:t.titulo,description:t.descricao,date:new Date().toISOString().slice(0,10),updates:0}}
 export function saveTickets(){/* Chamados agora são persistidos exclusivamente pela API/MySQL. */}
 export function updateProfile(){throw new Error("Atualização de perfil será habilitada por endpoint autenticado.");}
