@@ -7,7 +7,7 @@ export async function login(email,senha,perfil){const data=await apiRequest("/au
 export async function registerClient(data){const result=await apiRequest("/auth/register",{method:"POST",body:JSON.stringify(data)});saveSession(result.usuario);return result.usuario}
 export async function restoreSession(){const data=await apiRequest("/auth/me");saveSession(data.usuario);return data.usuario}
 export async function logout(){try{await apiRequest("/auth/logout",{method:"POST"})}finally{clearSession()}}
-export async function getTickets(){return (await apiRequest("/chamados")).chamados||[]}
+export async function getTickets(){const rows=(await apiRequest("/chamados")).chamados||[];return rows.map(t=>({...t,id:t.codigo||String(t.id),title:t.titulo,description:t.descricao,date:t.criado_em?String(t.criado_em).slice(0,10):"",updates:0}))}
 export async function createTicket(data){return (await apiRequest("/chamados",{method:"POST",body:JSON.stringify(data)})).chamado}
 export function saveTickets(){/* Chamados agora são persistidos exclusivamente pela API/MySQL. */}
 export function updateProfile(){throw new Error("Atualização de perfil será habilitada por endpoint autenticado.");}
