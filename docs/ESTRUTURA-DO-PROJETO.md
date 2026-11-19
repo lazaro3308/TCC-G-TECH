@@ -2,9 +2,9 @@
 
 **Projeto:** G-TECH  
 **Documento:** EC-001  
-**Versão:** 1.0
+**Versão:** 1.1
 
-## 1. Estrutura de diretórios
+## 1. Estrutura atual do repositório
 
 ```text
 G-TECH/
@@ -21,70 +21,79 @@ G-TECH/
 │   ├── index.html
 │   └── package.json
 ├── server/
-│   ├── src/
-│   │   ├── config/
-│   │   ├── routes/
-│   │   ├── controllers/
-│   │   ├── services/
-│   │   ├── repositories/
-│   │   ├── middlewares/
-│   │   ├── utils/
-│   │   └── server.js
+│   ├── database/
+│   │   └── schema.sql
+│   ├── scripts/
+│   │   └── criar-tecnico.js
+│   ├── index.js
 │   ├── .env.example
 │   └── package.json
-├── mobile/
-├── database/
-│   └── gtech.sql
+├── mobile/                 # reservado para etapa futura
 ├── docs/
 │   ├── assets/
+│   ├── AUTENTICACAO-E-PAINEL-TECNICO.md
 │   ├── REQUISITOS-E-REGRAS.md
 │   ├── MODELAGEM-DE-DADOS.md
 │   ├── FLUXOS-E-ARQUITETURA.md
 │   ├── ESTRUTURA-DO-PROJETO.md
 │   └── PLANO-DE-TESTES.md
-├── .gitignore
+├── package.json            # atalhos para scripts do client
 └── README.md
 ```
 
 ## 2. Responsabilidade dos diretórios
 
 ### `client/`
-Contém a aplicação React para navegadores.
-- `components/`: componentes reutilizáveis.
-- `pages/`: páginas e áreas do sistema.
-- `services/`: comunicação HTTP com a API.
+Aplicação web React executada pelo Vite.
+- `components/`: elementos reutilizáveis, como navegação e componentes de interface.
+- `pages/`: páginas da área do cliente e do painel técnico.
+- `services/`: comunicação HTTP com a API e funções de sessão.
 - `styles/`: estilos globais e específicos.
 - `assets/`: imagens, ícones e demais recursos visuais.
 
 ### `server/`
-Contém a API Node.js, sem Express.
-- `config/`: configuração de ambiente e banco de dados.
-- `routes/`: associação entre método HTTP, caminho e controller.
-- `controllers/`: tratamento de requisições e respostas.
-- `services/`: regras de negócio e validações de domínio.
-- `repositories/`: acesso ao banco e consultas SQL parametrizadas.
-- `middlewares/`: autenticação, autorização e tratamento transversal.
-- `utils/`: funções auxiliares.
+API Node.js com Express.
+- `index.js`: inicialização do Express, middlewares, autenticação, rotas e acesso aos dados.
+- `database/schema.sql`: criação do banco e das tabelas.
+- `scripts/criar-tecnico.js`: criação administrativa de contas técnicas.
+- `.env.example`: modelo das variáveis necessárias para execução.
 
-### `database/`
-Scripts de criação e evolução do banco de dados.
+A API está atualmente concentrada em `index.js`. A separação futura em rotas, controllers, serviços e repositórios poderá ocorrer conforme o projeto crescer; essas pastas não devem ser consideradas implementadas neste momento.
 
 ### `mobile/`
-Diretório reservado ao aplicativo React Native com Expo, previsto para etapa posterior.
+Diretório reservado ao aplicativo React Native com Expo. O aplicativo ainda não faz parte da versão funcional documentada.
 
 ### `docs/`
-Documentação funcional, técnica, diagramas e materiais visuais.
+Requisitos, regras de negócio, modelagem, arquitetura, instruções técnicas e plano de testes.
 
-## 3. Padrão de comunicação entre camadas
+## 3. Comunicação entre camadas
 
-O cliente web e o aplicativo móvel deverão consumir a API por HTTP, utilizando JSON. Controllers não deverão concentrar regras de negócio ou consultas SQL. Os serviços coordenarão as regras e os repositórios serão responsáveis pelo acesso aos dados.
+O navegador consome a API por HTTP, enviando e recebendo JSON. A API valida os dados, verifica a sessão e o perfil do usuário e executa consultas parametrizadas no MySQL. O cookie de sessão é enviado pelo navegador nas requisições autenticadas.
 
-## 4. Convenções de código
+## 4. Scripts npm
 
-- Utilizar nomes descritivos e consistentes.
-- Manter um módulo por responsabilidade.
-- Evitar duplicação de regras de negócio.
-- Validar entradas recebidas pela API.
-- Utilizar consultas parametrizadas.
+Na raiz, os scripts delegam ao projeto web:
+
+| Comando | Ação |
+|---|---|
+| `npm run dev` | Inicia o Vite do diretório `client` |
+| `npm run build` | Gera o build de produção do cliente |
+| `npm run preview` | Pré-visualiza o build do cliente |
+
+Na pasta `server`:
+
+| Comando | Ação |
+|---|---|
+| `npm run dev` | Inicia a API com reinicialização ao detectar alterações |
+| `npm start` | Inicia a API |
+| `npm run create:technician` | Executa o cadastro de uma conta técnica |
+
+## 5. Convenções
+
+- Manter nomes descritivos e consistentes.
+- Separar componentes visuais e acesso à API.
+- Validar entradas no cliente e no servidor.
+- Utilizar consultas SQL parametrizadas.
 - Centralizar configurações sensíveis em variáveis de ambiente.
+- Não versionar `.env`, credenciais ou tokens.
 - Registrar alterações estruturais do banco em scripts versionados.
