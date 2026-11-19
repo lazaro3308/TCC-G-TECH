@@ -6,7 +6,7 @@
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
 [![Node.js](https://img.shields.io/badge/Node.js-API-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Express](https://img.shields.io/badge/Express-5-000000?style=flat-square&logo=express&logoColor=white)](https://expressjs.com/)
-[![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?style=flat-square&logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?style=flat-square&logo=mysql&logoColor=white)](https://www.mysql.com/)\n[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 O **G-TECH** é uma aplicação web para abertura, gerenciamento e acompanhamento de chamados de suporte técnico. O projeto possui uma área para clientes e um painel para a equipe técnica, conectados a uma API Node.js e a um banco de dados MySQL.
 
@@ -212,4 +212,4 @@ Nunca versione `.env`, senhas, tokens ou dados pessoais.
 
 ## Licença
 
-A licença deverá ser definida pelos responsáveis pelo projeto antes de uma distribuição pública.
+Este projeto é distribuído sob os termos da **Apache License 2.0**. Consulte o arquivo [LICENSE](LICENSE) para ver o texto completo da licença.\n\nA licença se aplica ao código deste repositório, respeitando avisos de copyright e licenças de terceiros. Bibliotecas, frameworks, ícones e demais dependências mantêm suas próprias licenças.
