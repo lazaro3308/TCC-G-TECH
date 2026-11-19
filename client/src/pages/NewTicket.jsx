@@ -9,7 +9,7 @@ export default function NewTicket({onCreate}) {
     e.preventDefault();
     if(form.title.trim().length<5||form.description.trim().length<15||!form.category){setError("Informe um título, uma categoria e uma descrição com pelo menos 15 caracteres.");return;}
     setLoading(true);setError("");
-    try {await onCreate(form);navigate("/chamados");}
+    try {const ticket=await onCreate(form);navigate(`/chamado-sucesso/${encodeURIComponent(ticket.id)}`,{state:{ticket}});}
     catch {setError("Não foi possível registrar o chamado. Tente novamente.");}
     finally {setLoading(false);}
   }
