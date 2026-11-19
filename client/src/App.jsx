@@ -1,5 +1,6 @@
 import React,{useEffect,useState} from "react";
 import {BrowserRouter,Navigate,Route,Routes,useNavigate} from "react-router-dom";
+import "./styles/technician.css";
 import Sidebar from "./components/Sidebar.jsx";import Topbar from "./components/Topbar.jsx";
 import Login from "./pages/Login.jsx";import Dashboard from "./pages/Dashboard.jsx";import Tickets from "./pages/Tickets.jsx";import NewTicket from "./pages/NewTicket.jsx";import TicketDetails from "./pages/TicketDetails.jsx";import Profile from "./pages/Profile.jsx";import TechnicianDashboard from "./pages/TechnicianDashboard.jsx";
 import {apiRequest,clearSession,createTicket,getSession,getTickets,login as authenticate,logout as endSession,restoreSession,saveSession} from "./services/api.js";
