@@ -1,37 +1,6 @@
-import React from 'react';
-import { useState } from "react";
-import { ArrowRight, ShieldCheck, Headset, Zap } from "lucide-react";
-
-export default function Login({onLogin}) {
-  const [email,setEmail]=useState("cliente@gtech.com");
-  const [password,setPassword]=useState("gtech123");
-  const [name,setName]=useState("Cliente G-TECH");
-  const [mode,setMode]=useState("login");
-  const [error,setError]=useState("");
-  function submit(e) {
-    e.preventDefault();
-    if(!email.trim()||!password.trim()||(mode==="register"&&!name.trim())) {setError("Preencha todos os campos.");return;}
-    onLogin({name:name.trim()||"Cliente G-TECH",email:email.trim(),company:"Cliente G-TECH"});
-  }
-  return <main className="auth-screen">
-    <section className="auth-showcase">
-      <div className="auth-brand"><span className="brand-mark">G</span> G-TECH</div>
-      <div className="showcase-content"><span className="eyebrow">SUPORTE TÉCNICO INTELIGENTE</span><h1>Seu suporte.<br/><em>Mais simples.</em></h1><p>Abra solicitações, acompanhe atualizações e tenha todo o suporte técnico em um só lugar.</p>
-        <div className="showcase-points"><span><ShieldCheck/> Atendimento organizado</span><span><Zap/> Acompanhamento centralizado</span><span><Headset/> Suporte em um só lugar</span></div>
-      </div><div className="auth-footer">G-TECH · Plataforma de atendimento</div>
-    </section>
-    <section className="auth-form-area"><form className="auth-form" onSubmit={submit}>
-      <div className="mobile-auth-brand"><span className="brand-mark">G</span> G-TECH</div>
-      <span className="eyebrow">{mode==="login"?"BEM-VINDO DE VOLTA":"CRIE SUA CONTA"}</span>
-      <h2>{mode==="login"?"Acesse sua conta":"Comece por aqui"}</h2>
-      <p className="muted">{mode==="login"?"Entre para acompanhar seus chamados.":"Preencha os dados para acessar o portal demonstrativo."}</p>
-      {mode==="register"&&<label>Nome completo<input value={name} onChange={e=>setName(e.target.value)} placeholder="Seu nome" autoComplete="name"/></label>}
-      <label>E-mail<input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="voce@email.com" autoComplete="email" required/></label>
-      <label>Senha<input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Sua senha" autoComplete={mode==="login"?"current-password":"new-password"} required/></label>
-      {error&&<p className="form-error">{error}</p>}
-      <button className="button-primary button-wide" type="submit">{mode==="login"?"Entrar no portal":"Criar acesso"} <ArrowRight size={18}/></button>
-      <p className="auth-switch">{mode==="login"?"Ainda não tem acesso?":"Já possui uma conta?"} <button type="button" onClick={()=>{setMode(mode==="login"?"register":"login");setError("");}}>{mode==="login"?"Criar conta":"Fazer login"}</button></p>
-      <div className="demo-note"><ShieldCheck size={17}/><span><strong>Modo de demonstração</strong> — a autenticação real será ativada quando a API estiver integrada. Os dados preenchidos servem para visualizar o portal.</span></div>
-    </form></section>
-  </main>;
-}
+import React,{useState} from "react";
+import {ArrowRight,ShieldCheck,Headset,Zap} from "lucide-react";
+import {login,registerClient} from "../services/api.js";
+export default function Login({onLogin}){const [perfil,setPerfil]=useState("cliente"),[mode,setMode]=useState("login"),[nome,setNome]=useState(""),[email,setEmail]=useState(""),[senha,setSenha]=useState(""),[empresa,setEmpresa]=useState(""),[error,setError]=useState(""),[busy,setBusy]=useState(false);
+async function submit(e){e.preventDefault();setError("");setBusy(true);try{const user=mode==="register"?await registerClient({nome,email,senha,empresa}):await login(email,senha,perfil);onLogin(user)}catch(err){setError(err.message)}finally{setBusy(false)}}
+return <main className="auth-screen"><section className="auth-showcase"><div className="auth-brand"><span className="brand-mark">G</span> G-TECH</div><div className="showcase-content"><span className="eyebrow">SUPORTE TÉCNICO INTELIGENTE</span><h1>Seu suporte.<br/><em>Mais simples.</em></h1><p>Abra solicitações, acompanhe atualizações e tenha todo o suporte técnico em um só lugar.</p><div className="showcase-points"><span><ShieldCheck/> Acesso por perfil</span><span><Zap/> Chamados centralizados</span><span><Headset/> Equipe técnica especializada</span></div></div><div className="auth-footer">G-TECH · Plataforma de atendimento</div></section><section className="auth-form-area"><form className="auth-form" onSubmit={submit}><div className="mobile-auth-brand"><span className="brand-mark">G</span> G-TECH</div><span className="eyebrow">{perfil==="tecnico"?"ACESSO DA EQUIPE TÉCNICA":"PORTAL DO CLIENTE"}</span><h2>{mode==="register"?"Criar conta de cliente":"Acesse sua conta"}</h2><p className="muted">Escolha como deseja acessar a plataforma.</p><label>Tipo de acesso<select value={perfil} onChange={e=>{setPerfil(e.target.value);setMode("login");setError("")}}><option value="cliente">Sou cliente</option><option value="tecnico">Sou técnico</option></select></label>{mode==="register"&&<><label>Nome completo<input value={nome} onChange={e=>setNome(e.target.value)} required minLength="2" maxLength="120"/></label><label>Empresa (opcional)<input value={empresa} onChange={e=>setEmpresa(e.target.value)} maxLength="160"/></label></>}<label>E-mail<input type="email" value={email} onChange={e=>setEmail(e.target.value)} autoComplete="username" required/></label><label>Senha<input type="password" value={senha} onChange={e=>setSenha(e.target.value)} autoComplete={mode==="login"?"current-password":"new-password"} minLength="12" maxLength="128" required/></label>{error&&<p className="form-error">{error}</p>}<button className="button-primary button-wide" disabled={busy}>{busy?"Aguarde...":mode==="register"?"Criar conta":"Entrar"} <ArrowRight size={18}/></button>{perfil==="cliente"&&<p className="auth-switch">{mode==="login"?"Ainda não tem conta?":"Já possui cadastro?"} <button type="button" onClick={()=>{setMode(mode==="login"?"register":"login");setError("")}}>{mode==="login"?"Criar conta":"Fazer login"}</button></p>}<div className="demo-note"><ShieldCheck size={17}/><span><strong>Autenticação protegida</strong> — técnicos são cadastrados administrativamente; não existe cadastro público de técnico.</span></div></form></section></main>}

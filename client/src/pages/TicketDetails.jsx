@@ -9,7 +9,7 @@ export default function TicketDetails({tickets}) {
   return <div className="page-stack"><button className="back-link" onClick={()=>navigate(-1)}><ArrowLeft size={16}/> Voltar aos chamados</button><section className="content-card detail-card">
     <div className="detail-top"><div><span className="ticket-code">{ticket.id}</span><h2>{ticket.title}</h2><p>Solicitação registrada em {date}</p></div><TicketStatus status={ticket.status}/></div>
     <div className="detail-metadata"><div><Tag/><span>Categoria<strong>{ticket.category}</strong></span></div><div><Flag/><span>Prioridade<strong>{ticket.priority}</strong></span></div><div><CalendarDays/><span>Data de abertura<strong>{date}</strong></span></div></div>
-    <div className="detail-description"><h3>Descrição</h3><p>{ticket.description}</p></div>
+    <div className="detail-description"><h3>Descrição</h3><p>{ticket.description}</p></div>{ticket.resposta_tecnica&&<div className="detail-description"><h3>Resposta da equipe técnica</h3><p>{ticket.resposta_tecnica}</p></div>}
     <div className="timeline"><h3><MessageSquare size={18}/> Acompanhamento</h3><div className="timeline-item"><i/><div><strong>Solicitação registrada</strong><span>Seu chamado foi recebido pelo portal.</span><small>{date}</small></div></div><div className="timeline-item muted-timeline"><i/><div><strong>{ticket.status}</strong><span>Este é o status atual da solicitação.</span></div></div></div>
     <div className="privacy-note"><ShieldCheck size={17}/> As atualizações detalhadas serão exibidas aqui quando o histórico da API estiver disponível.</div>
   </section></div>;

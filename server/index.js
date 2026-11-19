@@ -1,84 +1,25 @@
-
-const express = require("express");
-const cors = require("cors");
-
-// Importar conexão com MySQL
-const conexao = require("./database/conexao");
-
-const app = express();
-
-app.use(cors());
-app.use(express.json());
-
-// ROTA 1: Receber chamados
-app.post("/chamados", (req, res) => {
-
-    const { empresa, email, problema } = req.body;
-
-    console.log("Empresa:", empresa);
-    console.log("Email:", email);
-    console.log("Problema:", problema);
-
-    res.status(201).json({
-        mensagem: "Chamado recebido com sucesso!",
-        chamado: {
-            empresa,
-            email,
-            problema
-        }
-    });
-});
-
-// ROTA 2: Cadastrar clientes
-app.post("/clientes", (req, res) => {
-
-    // Receber os dados enviados
-    const { nome, email, telefone, empresa } = req.body;
-
-    // Verificar se os campos obrigatórios foram preenchidos
-    if (!nome || !email) {
-        return res.status(400).json({
-            mensagem: "Nome e e-mail são obrigatórios."
-        });
-    }
-
-    // Comando SQL
-    const sql = `
-        INSERT INTO clientes (nome, email, telefone, empresa)
-        VALUES (?, ?, ?, ?)
-    `;
-
-    // Salvar no MySQL
-    conexao.query(
-        sql,
-        [nome, email, telefone || null, empresa || null],
-        (erro, resultado) => {
-
-            if (erro) {
-                console.log("Erro ao cadastrar:", erro.message);
-
-                return res.status(500).json({
-                    mensagem: "Não foi possível cadastrar o cliente."
-                });
-            }
-
-            console.log("Cliente cadastrado:", nome);
-
-            return res.status(201).json({
-                mensagem: "Cliente cadastrado com sucesso!",
-                cliente: {
-                    id: resultado.insertId,
-                    nome,
-                    email,
-                    telefone,
-                    empresa
-                }
-            });
-        }
-    );
-});
-
-// Iniciar servidor
-app.listen(3000, () => {
-    console.log("Servidor rodando na porta 3000");
-});
+require("dotenv").config();
+const express=require("express"),cors=require("cors"),helmet=require("helmet"),rateLimit=require("express-rate-limit"),bcrypt=require("bcryptjs"),jwt=require("jsonwebtoken"),cookieParser=require("cookie-parser"),mysql=require("mysql2/promise"),crypto=require("node:crypto");
+const app=express(),PORT=+(process.env.PORT||3000),secret=process.env.JWT_SECRET,production=process.env.NODE_ENV==="production",origin=process.env.CLIENT_ORIGIN||"http://localhost:5173";
+if(!secret||secret.length<32){console.error("Configure JWT_SECRET com pelo menos 32 caracteres.");process.exit(1)}
+const db=mysql.createPool({host:process.env.DB_HOST||"localhost",port:+(process.env.DB_PORT||3306),user:process.env.DB_USER||"root",password:process.env.DB_PASSWORD||"",database:process.env.DB_NAME||"g_tech_suporte",waitForConnections:true,connectionLimit:10,charset:"utf8mb4"});
+const cookie={httpOnly:true,secure:production||process.env.COOKIE_SECURE==="true",sameSite:"lax",path:"/",maxAge:8*60*60*1000};
+app.disable("x-powered-by");app.use(helmet());app.use(cors({origin,credentials:true,methods:["GET","POST","PATCH","OPTIONS"],allowedHeaders:["Content-Type"]}));app.use(express.json({limit:"20kb"}));app.use(cookieParser());
+const authLimit=rateLimit({windowMs:15*60*1000,limit:8,standardHeaders:true,legacyHeaders:false});
+app.use(rateLimit({windowMs:60000,limit:120,standardHeaders:true,legacyHeaders:false}));
+app.use((req,res,next)=>{if(["POST","PATCH","PUT","DELETE"].includes(req.method)&&req.path!=="/health"&&req.get("origin")!==origin)return res.status(403).json({mensagem:"Origem não autorizada."});next()});
+const emailOK=e=>typeof e==="string"&&e.length<=190&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+function issue(res,u){res.cookie("gtech_session",jwt.sign({sub:String(u.id),perfil:u.perfil},secret,{expiresIn:"8h",issuer:"gtech-api",audience:"gtech-client"}),cookie)}
+function auth(req,res,next){try{const p=jwt.verify(req.cookies.gtech_session,secret,{issuer:"gtech-api",audience:"gtech-client"});req.user={id:+p.sub,perfil:p.perfil};next()}catch{return res.status(401).json({mensagem:"Faça login novamente."})}}
+const technician=(req,res,next)=>req.user.perfil==="tecnico"?next():res.status(403).json({mensagem:"Acesso exclusivo da equipe técnica."});
+app.get("/health",(_q,s)=>s.json({status:"ok"}));
+app.post("/auth/register",authLimit,async(q,s)=>{const {nome,email,senha,empresa,telefone}=q.body||{};if(typeof nome!=="string"||nome.trim().length<2||nome.length>120||!emailOK(email)||typeof senha!=="string"||senha.length<12||senha.length>128)return s.status(400).json({mensagem:"Informe nome, e-mail válido e senha entre 12 e 128 caracteres."});try{const [r]=await db.execute("INSERT INTO usuarios(nome,email,senha_hash,empresa,telefone,perfil) VALUES(?,?,?,?,?,'cliente')",[nome.trim(),email.trim().toLowerCase(),await bcrypt.hash(senha,12),typeof empresa==="string"?empresa.trim().slice(0,160):null,typeof telefone==="string"?telefone.trim().slice(0,30):null]);const u={id:r.insertId,nome:nome.trim(),email:email.trim().toLowerCase(),perfil:"cliente",empresa:empresa||""};issue(s,u);s.status(201).json({usuario:u})}catch(e){s.status(e.code==="ER_DUP_ENTRY"?409:500).json({mensagem:e.code==="ER_DUP_ENTRY"?"E-mail já cadastrado.":"Falha ao cadastrar cliente."})}});
+app.post("/auth/login",authLimit,async(q,s)=>{const {email,senha,perfil}=q.body||{};if(!emailOK(email)||typeof senha!=="string"||!["cliente","tecnico"].includes(perfil))return s.status(400).json({mensagem:"Dados inválidos."});try{const [r]=await db.execute("SELECT id,nome,email,senha_hash,perfil,empresa,ativo FROM usuarios WHERE email=? LIMIT 1",[email.trim().toLowerCase()]);const u=r[0],ok=u?await bcrypt.compare(senha,u.senha_hash):false;if(!u||!ok||!u.ativo||u.perfil!==perfil)return s.status(401).json({mensagem:"E-mail, senha ou perfil incorretos."});issue(s,u);s.json({usuario:{id:u.id,nome:u.nome,email:u.email,perfil:u.perfil,empresa:u.empresa||""}})}catch(e){console.error("Login:",e.code);s.status(500).json({mensagem:"Falha na autenticação."})}});
+app.post("/auth/logout",(_q,s)=>{s.clearCookie("gtech_session",{...cookie,maxAge:undefined});s.status(204).end()});
+app.get("/auth/me",auth,async(q,s)=>{const [r]=await db.execute("SELECT id,nome,email,perfil,empresa FROM usuarios WHERE id=? AND ativo=1",[q.user.id]);if(!r[0])return s.status(401).json({mensagem:"Conta indisponível."});s.json({usuario:r[0]})});
+app.post("/chamados",auth,async(q,s)=>{if(q.user.perfil!=="cliente")return s.status(403).json({mensagem:"Somente clientes podem abrir chamados."});const {titulo,categoria,prioridade,descricao}=q.body||{};if(typeof titulo!=="string"||titulo.trim().length<4||titulo.length>160||typeof categoria!=="string"||categoria.trim().length<2||categoria.length>80||!["Baixa","Normal","Alta","Urgente"].includes(prioridade)||typeof descricao!=="string"||descricao.trim().length<10||descricao.length>5000)return s.status(400).json({mensagem:"Revise os dados do chamado."});const codigo="GT-"+new Date().getFullYear()+"-"+crypto.randomBytes(4).toString("hex").toUpperCase();try{const [r]=await db.execute("INSERT INTO chamados(codigo,cliente_id,titulo,categoria,prioridade,descricao) VALUES(?,?,?,?,?,?)",[codigo,q.user.id,titulo.trim(),categoria.trim(),prioridade,descricao.trim()]);await db.execute("INSERT INTO historico_chamados(chamado_id,autor_id,mensagem) VALUES(?,?,?)",[r.insertId,q.user.id,"Chamado aberto pelo cliente."]);s.status(201).json({chamado:{id:r.insertId,codigo,titulo,categoria,prioridade,status:"Aguardando atendimento",descricao}})}catch(e){console.error("Chamado:",e.code);s.status(500).json({mensagem:"Não foi possível registrar o chamado."})}});
+app.get("/chamados",auth,async(q,s)=>{try{const sql=q.user.perfil==="tecnico"?"SELECT c.*,u.nome cliente_nome,u.email cliente_email,t.nome tecnico_nome FROM chamados c JOIN usuarios u ON u.id=c.cliente_id LEFT JOIN usuarios t ON t.id=c.tecnico_id ORDER BY c.criado_em DESC LIMIT 250":"SELECT c.* FROM chamados c WHERE c.cliente_id=? ORDER BY c.criado_em DESC LIMIT 250";const [r]=await db.execute(sql,q.user.perfil==="tecnico"?[]:[q.user.id]);s.json({chamados:r})}catch(e){console.error("Lista:",e.code);s.status(500).json({mensagem:"Falha ao listar chamados."})}});
+app.patch("/chamados/:id",auth,technician,async(q,s)=>{const id=+q.params.id,{status,resposta}=q.body||{},valid=["Aguardando atendimento","Em atendimento","Aguardando cliente","Resolvido","Cancelado"];if(!Number.isSafeInteger(id)||id<1||!valid.includes(status)||resposta!==undefined&&(typeof resposta!=="string"||resposta.length>3000))return s.status(400).json({mensagem:"Atualização inválida."});const c=await db.getConnection();try{await c.beginTransaction();const [r]=await c.execute("SELECT status FROM chamados WHERE id=? FOR UPDATE",[id]);if(!r[0]){await c.rollback();return s.status(404).json({mensagem:"Chamado não encontrado."})}await c.execute("UPDATE chamados SET status=?,tecnico_id=?,resposta_tecnica=COALESCE(?,resposta_tecnica) WHERE id=?",[status,q.user.id,resposta?.trim()||null,id]);await c.execute("INSERT INTO historico_chamados(chamado_id,autor_id,status_anterior,status_novo,mensagem) VALUES(?,?,?,?,?)",[id,q.user.id,r[0].status,status,resposta?.trim()||"Status atualizado pela equipe técnica."]);await c.commit();s.json({mensagem:"Chamado atualizado com sucesso."})}catch(e){await c.rollback();console.error("Update:",e.code);s.status(500).json({mensagem:"Falha ao atualizar chamado."})}finally{c.release()}});
+app.get("/tecnico/resumo",auth,technician,async(_q,s)=>{const [r]=await db.execute("SELECT COUNT(*) total,SUM(status='Aguardando atendimento') aguardando,SUM(status='Em atendimento') andamento,SUM(status='Resolvido') resolvidos FROM chamados");s.json({resumo:r[0]})});
+app.use((e,_q,s,_n)=>{console.error("API:",e.message);s.status(500).json({mensagem:"Erro interno do servidor."})});
+db.getConnection().then(c=>{c.release();app.listen(PORT,()=>console.log("G-TECH API ativa na porta "+PORT))}).catch(e=>{console.error("MySQL indisponível:",e.code);process.exit(1)});

@@ -1,104 +1,13 @@
-
-export const API_URL = (
-  import.meta.env.VITE_API_URL || "http://localhost:3000"
-).replace(/\/+$/, "");
-
-const read = (key, fallback) => {
-  try {
-    return JSON.parse(localStorage.getItem(key)) ?? fallback;
-  } catch {
-    return fallback;
-  }
-};
-
-const write = (key, value) => {
-  localStorage.setItem(key, JSON.stringify(value));
-};
-
-const seed = [
-  {
-    id: "GT-2026-001",
-    title: "Computador não inicia",
-    category: "Hardware",
-    priority: "Alta",
-    status: "Em atendimento",
-    date: "2026-11-08",
-    description: "O computador liga, mas não conclui a inicialização.",
-    updates: 3
-  },
-  {
-    id: "GT-2026-002",
-    title: "Instalação de software",
-    category: "Software",
-    priority: "Normal",
-    status: "Aguardando atendimento",
-    date: "2026-11-06",
-    description: "Solicito a instalação de um aplicativo de trabalho.",
-    updates: 1
-  },
-  {
-    id: "GT-2026-003",
-    title: "Instabilidade na conexão",
-    category: "Rede e Internet",
-    priority: "Baixa",
-    status: "Resolvido",
-    date: "2026-11-02",
-    description: "A conexão apresenta quedas durante o expediente.",
-    updates: 4
-  }
-];
-
-export const getTickets = () => read("gtech_tickets", seed);
-export const saveTickets = value => write("gtech_tickets", value);
-
-export const getSession = () => read("gtech_session", null);
-export const saveSession = value => write("gtech_session", value);
-export const clearSession = () => localStorage.removeItem("gtech_session");
-
-export async function createTicket(data, user = {}) {
-  const ticket = {
-    id: `GT-${new Date().getFullYear()}-${String(Date.now()).slice(-5)}`,
-    title: data.title.trim(),
-    category: data.category,
-    priority: data.priority,
-    status: "Aguardando atendimento",
-    date: new Date().toISOString().slice(0, 10),
-    description: data.description.trim(),
-    updates: 0,
-    apiSynced: false
-  };
-
-  try {
-    const response = await fetch(`${API_URL}/chamados`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        empresa: user.company || user.empresa || "Cliente G-TECH",
-        email: user.email || "",
-        problema: `${ticket.title}\nCategoria: ${ticket.category}\nPrioridade: ${ticket.priority}\n\n${ticket.description}`
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error("Não foi possível registrar o chamado.");
-    }
-
-    ticket.apiSynced = true;
-  } catch (error) {
-    console.error("Falha ao sincronizar chamado com a API:", error);
-  }
-
-  const tickets = getTickets();
-  saveTickets([ticket, ...tickets]);
-
-  return ticket;
-}
-
-export function updateProfile(profile) {
-  saveSession({
-    ...(getSession() || {}),
-    ...profile
-  });
-}
+export const API_URL=(import.meta.env.VITE_API_URL||"http://localhost:3000").replace(/\/+$/,"");
+export async function apiRequest(path,options={}){const response=await fetch(API_URL+path,{...options,credentials:"include",headers:{"Content-Type":"application/json",...(options.headers||{})}});if(response.status===204)return null;const data=await response.json().catch(()=>({mensagem:"Resposta inválida do servidor."}));if(!response.ok)throw new Error(data.mensagem||"Falha na comunicação com o servidor.");return data}
+export const getSession=()=>{try{return JSON.parse(sessionStorage.getItem("gtech_user"))}catch{return null}};
+export const saveSession=user=>sessionStorage.setItem("gtech_user",JSON.stringify(user));
+export const clearSession=()=>sessionStorage.removeItem("gtech_user");
+export async function login(email,senha,perfil){const data=await apiRequest("/auth/login",{method:"POST",body:JSON.stringify({email,senha,perfil})});const user={...data.usuario,name:data.usuario.nome};saveSession(user);return user}
+export async function registerClient(data){const result=await apiRequest("/auth/register",{method:"POST",body:JSON.stringify(data)});const user={...result.usuario,name:result.usuario.nome};saveSession(user);return user}
+export async function restoreSession(){const data=await apiRequest("/auth/me");const user={...data.usuario,name:data.usuario.nome};saveSession(user);return user}
+export async function logout(){try{await apiRequest("/auth/logout",{method:"POST"})}finally{clearSession()}}
+export async function getTickets(){const rows=(await apiRequest("/chamados")).chamados||[];return rows.map(t=>({...t,id:t.codigo||String(t.id),title:t.titulo,description:t.descricao,date:t.criado_em?String(t.criado_em).slice(0,10):"",updates:0}))}
+export async function createTicket(data){const t=(await apiRequest("/chamados",{method:"POST",body:JSON.stringify({titulo:data.title,categoria:data.category,prioridade:data.priority,descricao:data.description})})).chamado;return {...t,id:t.codigo||String(t.id),title:t.titulo,description:t.descricao,date:new Date().toISOString().slice(0,10),updates:0}}
+export function saveTickets(){/* Chamados agora são persistidos exclusivamente pela API/MySQL. */}
+export function updateProfile(){throw new Error("Atualização de perfil será habilitada por endpoint autenticado.");}
