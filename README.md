@@ -74,7 +74,7 @@ Solicitações de suporte podem ficar difíceis de acompanhar quando são regist
 - Consultas MySQL parametrizadas.
 - Configuração de Helmet, CORS e limitação de requisições.
 - Validação de entradas.
-- Histórico de alterações dos chamados.
+- Histórico transacional de abertura, atribuições, alterações de status e respostas técnicas.\n- Autorização para impedir que clientes consultem o histórico de outros clientes.
 
 ## 🧰 Tecnologias
 
@@ -147,7 +147,7 @@ cd TCC-G-TECH
 1. Inicie o serviço MySQL (por exemplo, pelo XAMPP).
 2. Abra o phpMyAdmin ou outro cliente MySQL.
 3. Importe e execute `server/database/schema.sql`.
-4. O script prepara o banco `g_tech_suporte` e as tabelas utilizadas pela aplicação.
+4. O script prepara o banco `g_tech_suporte` e as tabelas utilizadas pela aplicação.\n5. Se o banco já existia antes desta atualização, execute também `server/database/migrations/001_indice_fila_tecnica.sql` para adicionar o índice dos filtros sem apagar os dados.
 
 ### 3. Configurar a API
 
@@ -223,8 +223,8 @@ O comando executa o script de build do cliente.
 | GET | `/auth/me` | Consultar usuário autenticado |
 | POST | `/chamados` | Criar chamado como cliente |
 | GET | `/chamados` | Listar chamados conforme o perfil |
-| PATCH | `/chamados/:id` | Atualizar chamado como técnico |
-| GET | `/tecnico/resumo` | Consultar indicadores do painel técnico |
+| PATCH | `/chamados/:id` | Atualizar status, resposta e responsável como técnico |
+| GET | `/tecnico/resumo` | Consultar indicadores do painel técnico |\n| GET | `/tecnico/responsaveis` | Listar técnicos ativos para atribuição |\n| GET | `/chamados/:id/historico` | Consultar histórico autorizado do chamado |
 
 ## 📚 Documentação do projeto
 
