@@ -44,7 +44,6 @@ Este documento descreve casos a executar. Um caso listado não deve ser interpre
 
 Os cenários abaixo dependem de funcionalidades futuras e não devem ser considerados disponíveis na versão atual:
 - Administração de usuários e categorias.
-- Atribuição manual de chamados por funcionário/administrador.
 - Upload e validação de anexos.
 - Notificações push, e-mail ou WebSocket.
 - Avaliação de atendimento.
