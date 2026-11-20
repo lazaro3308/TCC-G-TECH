@@ -322,7 +322,7 @@ app.get("/chamados/:id/historico", auth, async (req, res) => {
     );
     const ticket = ticketRows[0];
     if (!ticket) return res.status(404).json({ mensagem: "Chamado não encontrado." });
-    if (req.user.perfil === "cliente" && ticket.cliente_id !== req.user.id) {
+    if (req.user.perfil === "cliente" && Number(ticket.cliente_id) !== Number(req.user.id)) {
       return res.status(404).json({ mensagem: "Chamado não encontrado." });
     }
     const [history] = await db.execute(
@@ -383,7 +383,7 @@ app.patch("/chamados/:id", auth, technician, async (req, res) => {
       return res.status(404).json({ mensagem: "Chamado não encontrado." });
     }
 
-    let nextTechnicianId = current.tecnico_id;
+    const currentTechnicianId = current.tecnico_id === null ? null : Number(current.tecnico_id);\n    let nextTechnicianId = currentTechnicianId;
     let nextTechnicianName = null;
     if (hasTechnician) {
       nextTechnicianId = body.tecnico_id === null ? null : Number(body.tecnico_id);
@@ -413,7 +413,7 @@ app.patch("/chamados/:id", auth, technician, async (req, res) => {
         [current.id, req.user.id, current.status, nextStatus, `Status alterado de "${current.status}" para "${nextStatus}".`],
       );
     }
-    if (hasTechnician && nextTechnicianId !== current.tecnico_id) {
+    if (hasTechnician && nextTechnicianId !== currentTechnicianId) {
       const message = nextTechnicianId === null
         ? "Responsável técnico removido do chamado."
         : `Chamado atribuído ao técnico ${nextTechnicianName}.`;
