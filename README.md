@@ -150,7 +150,7 @@ cd TCC-G-TECH
 2. Abra o phpMyAdmin ou outro cliente MySQL.
 3. Importe e execute `server/database/schema.sql`.
 4. O script prepara o banco `g_tech_suporte` e as tabelas utilizadas pela aplicação.
-5. Se o banco já existia antes desta atualização, execute também `server/database/migrations/001_indice_fila_tecnica.sql e `server/database/migrations/002_historico_mensagem_texto.sql`` para adicionar o índice dos filtros sem apagar os dados.
+5. Se o banco já existia antes desta atualização, execute os scripts `server/database/migrations/001_indice_fila_tecnica.sql` e `server/database/migrations/002_historico_mensagem_texto.sql` no phpMyAdmin. Eles preservam os registros existentes.
 
 ### 3. Configurar a API
 
