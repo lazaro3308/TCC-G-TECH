@@ -2,7 +2,7 @@ name: G-TECH CI
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, 'feat/**']
   push:
     branches: [main]
 
