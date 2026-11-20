@@ -2,7 +2,7 @@
 
 **Projeto:** G-TECH  
 **Documento:** PT-001  
-**Versão:** 1.1
+**Versão:** 1.2
 
 ## 1. Objetivo
 
@@ -30,12 +30,20 @@ Este documento descreve casos a executar. Um caso listado não deve ser interpre
 | CT14 | Encerrar sessão e consultar rota protegida | Sessão deixa de ser aceita | Alta |
 | CT15 | Enviar dados inválidos à API | API rejeita a requisição sem gravar dados inválidos | Alta |
 | CT16 | Executar build do cliente | Vite conclui a geração dos arquivos de produção | Média |
+| CT17 | Técnico atribuir chamado a técnico ativo | Responsável é salvo e evento aparece no histórico | Alta |
+| CT18 | Tentar atribuir chamado a usuário cliente/inativo | API rejeita a atribuição sem alterar o chamado | Alta |
+| CT19 | Remover responsável de um chamado | Campo fica sem responsável e evento é registrado | Média |
+| CT20 | Filtrar fila por status, prioridade e técnico | Somente chamados correspondentes são exibidos | Alta |
+| CT21 | Consultar histórico como cliente dono | Eventos do próprio chamado são retornados em ordem cronológica | Alta |
+| CT22 | Cliente consultar histórico de chamado alheio | API retorna 404 sem revelar o registro | Alta |
+| CT23 | Técnico alterar status | Evento contém status anterior, novo status, autor e data | Alta |
+| CT24 | Técnico registrar resposta | Resposta aparece ao cliente e evento é registrado | Alta |
+| CT25 | Executar migração em banco existente | Índice é criado sem apagar registros e pode ser executado novamente | Média |
 
 ## 3. Recursos ainda não implementados
 
 Os cenários abaixo dependem de funcionalidades futuras e não devem ser considerados disponíveis na versão atual:
 - Administração de usuários e categorias.
-- Atribuição manual de chamados por funcionário/administrador.
 - Upload e validação de anexos.
 - Notificações push, e-mail ou WebSocket.
 - Avaliação de atendimento.

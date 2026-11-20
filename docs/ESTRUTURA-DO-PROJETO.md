@@ -2,7 +2,7 @@
 
 **Projeto:** G-TECH  
 **Documento:** EC-001  
-**Versão:** 1.1
+**Versão:** 1.2
 
 ## 1. Estrutura atual do repositório
 
@@ -22,7 +22,9 @@ G-TECH/
 │   └── package.json
 ├── server/
 │   ├── database/
-│   │   └── schema.sql
+│   │   ├── schema.sql
+│   │   └── migrations/
+│   │       └── 001_indice_fila_tecnica.sql
 │   ├── scripts/
 │   │   └── criar-tecnico.js
 │   ├── index.js
@@ -54,7 +56,8 @@ Aplicação web React executada pelo Vite.
 ### `server/`
 API Node.js com Express.
 - `index.js`: inicialização do Express, middlewares, autenticação, rotas e acesso aos dados.
-- `database/schema.sql`: criação do banco e das tabelas.
+- `database/schema.sql`: criação do banco, tabelas e índices para instalações novas.
+- `database/migrations/`: atualizações incrementais e seguras para bancos já existentes.
 - `scripts/criar-tecnico.js`: criação administrativa de contas técnicas.
 - `.env.example`: modelo das variáveis necessárias para execução.
 

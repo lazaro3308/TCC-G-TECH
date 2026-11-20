@@ -2089,3 +2089,11 @@ tbody tr:hover {
 .auth-form select{height:44px;padding:0 12px;border:1px solid #303a30;border-radius:7px;outline:0;background:#101510;color:#edf2eb;font-size:12px}
 .auth-form select:focus{border-color:#57964c;box-shadow:0 0 0 3px #39ff1410}
 .auth-form button:disabled{opacity:.55;cursor:wait}
+
+
+.ticket-history-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.ticket-history-heading h3{margin:0}
+.ticket-history-heading button{display:inline-flex;align-items:center;gap:6px;padding:7px 9px;border:1px solid #304031;border-radius:7px;background:#141c15;color:#a5ff91;font-size:10px}
+.ticket-history-heading button:disabled{opacity:.55;cursor:wait}
+.history-feedback{margin:12px 0;color:#91a18d;font-size:10px;line-height:1.6}
+.detail-metadata{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}

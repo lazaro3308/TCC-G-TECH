@@ -31,7 +31,8 @@ CREATE TABLE IF NOT EXISTS chamados (
   CONSTRAINT fk_chamados_cliente FOREIGN KEY (cliente_id) REFERENCES usuarios(id),
   CONSTRAINT fk_chamados_tecnico FOREIGN KEY (tecnico_id) REFERENCES usuarios(id),
   INDEX idx_chamados_status_data (status, criado_em),
-  INDEX idx_chamados_cliente_data (cliente_id, criado_em)
+  INDEX idx_chamados_cliente_data (cliente_id, criado_em),
+  INDEX idx_chamados_tecnico_status_data (tecnico_id, status, criado_em)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS historico_chamados (
@@ -40,7 +41,7 @@ CREATE TABLE IF NOT EXISTS historico_chamados (
   autor_id BIGINT UNSIGNED NOT NULL,
   status_anterior VARCHAR(40) NULL,
   status_novo VARCHAR(40) NULL,
-  mensagem VARCHAR(1000) NOT NULL,
+  mensagem TEXT NOT NULL,
   criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_historico_chamado FOREIGN KEY (chamado_id) REFERENCES chamados(id) ON DELETE CASCADE,
   CONSTRAINT fk_historico_autor FOREIGN KEY (autor_id) REFERENCES usuarios(id),

@@ -1,0 +1,45 @@
+name: G-TECH CI
+
+on:
+  pull_request:
+    branches: [main, 'feat/**']
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  client:
+    name: Build do front-end
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+      - name: Instalar dependências do cliente
+        run: npm ci --prefix client
+      - name: Gerar build
+        run: npm run build --prefix client
+
+  server:
+    name: Verificação da API
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - name: Instalar dependências da API
+        run: npm install --prefix server --no-audit --no-fund
+      - name: Verificar sintaxe da API
+        run: node --check server/index.js

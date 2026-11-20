@@ -2,7 +2,7 @@
 
 **Projeto:** G-TECH  
 **Documento:** MD-001  
-**Versão:** 1.1  
+**Versão:** 1.2  
 **Banco físico:** `g_tech_suporte`
 
 ## 1. Visão geral
@@ -98,8 +98,12 @@ Os estados aceitos pelo schema atual são:
 - `Resolvido`
 - `Cancelado`
 
-As tabelas utilizam InnoDB e chaves estrangeiras. Índices apoiam consultas por perfil/estado, cliente e data. O histórico registra a abertura do chamado e as atualizações realizadas pela equipe técnica.
+As tabelas utilizam InnoDB e chaves estrangeiras. Índices apoiam consultas por perfil/estado, cliente e data. O histórico registra a abertura, mudanças de status, atribuições e remoção de responsável, além de novas respostas técnicas. O índice `idx_chamados_tecnico_status_data` apoia os filtros do painel por técnico, status e data.
 
-## 6. Evoluções previstas
+## 6. Migração de bancos existentes
+
+O schema de instalação nova já inclui o índice da fila técnica. Para bancos que já foram criados anteriormente, execute `server/database/migrations/001_indice_fila_tecnica.sql` e `server/database/migrations/002_historico_mensagem_texto.sql` no phpMyAdmin. A primeira verifica se o índice existe antes de criá-lo; a segunda amplia o tipo da coluna de mensagem sem apagar os eventos existentes.
+
+## 7. Evoluções previstas
 
 A modelagem poderá ser ampliada para incluir comentários públicos e internos, anexos, notificações, avaliações, categorias administráveis, permissões mais granulares e trilha de auditoria. Qualquer evolução deverá atualizar o script SQL e este documento em conjunto.
