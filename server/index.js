@@ -383,7 +383,8 @@ app.patch("/chamados/:id", auth, technician, async (req, res) => {
       return res.status(404).json({ mensagem: "Chamado não encontrado." });
     }
 
-    const currentTechnicianId = current.tecnico_id === null ? null : Number(current.tecnico_id);\n    let nextTechnicianId = currentTechnicianId;
+    const currentTechnicianId = current.tecnico_id === null ? null : Number(current.tecnico_id);
+    let nextTechnicianId = currentTechnicianId;
     let nextTechnicianName = null;
     if (hasTechnician) {
       nextTechnicianId = body.tecnico_id === null ? null : Number(body.tecnico_id);
