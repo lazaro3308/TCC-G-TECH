@@ -16,6 +16,7 @@ O cadastro público sempre cria o perfil `cliente`. Não há opção para o usu�
 2. Abra o phpMyAdmin.
 3. Importe `server/database/schema.sql`.
 4. Confirme a criação do banco `g_tech_suporte` e das tabelas `usuarios`, `chamados` e `historico_chamados`.
+5. Se estiver atualizando um banco já existente, execute em ordem as migrações `server/database/migrations/001_indice_fila_tecnica.sql` e `server/database/migrations/002_historico_mensagem_texto.sql`.
 
 ## 3. Configurar variáveis de ambiente
 
