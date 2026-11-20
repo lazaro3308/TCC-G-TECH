@@ -11,6 +11,7 @@
   <img src="https://img.shields.io/badge/Node.js-API-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js">
   <img src="https://img.shields.io/badge/Express-5-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express 5">
   <img src="https://img.shields.io/badge/MySQL-Database-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
+  <a href="https://github.com/lazaro3308/TCC-G-TECH/actions/workflows/ci.yml"><img src="https://github.com/lazaro3308/TCC-G-TECH/actions/workflows/ci.yml/badge.svg?branch=main" alt="G-TECH CI"></a>
 </p>
 
 O **G-TECH** é um projeto acadêmico de conclusão de curso (TCC) que propõe organizar o fluxo de atendimento de suporte técnico em uma aplicação web. O sistema possui uma área destinada aos clientes e um painel para a equipe técnica, integrados a uma API em Node.js e a um banco de dados MySQL.
@@ -150,7 +151,7 @@ cd TCC-G-TECH
 2. Abra o phpMyAdmin ou outro cliente MySQL.
 3. Importe e execute `server/database/schema.sql`.
 4. O script prepara o banco `g_tech_suporte` e as tabelas utilizadas pela aplicação.
-5. Se o banco já existia antes desta atualização, execute os scripts `server/database/migrations/001_indice_fila_tecnica.sql` e `server/database/migrations/002_historico_mensagem_texto.sql` no phpMyAdmin. Eles preservam os registros existentes.
+5. **Banco já existente:** faça um backup antes de qualquer alteração. Execute novamente o `server/database/schema.sql` atualizado para criar tabelas que ainda não existam (o script usa `CREATE TABLE IF NOT EXISTS` e não atualiza a estrutura de tabelas já criadas). Em seguida, execute, nesta ordem, `server/database/migrations/001_indice_fila_tecnica.sql` e `server/database/migrations/002_historico_mensagem_texto.sql`. Essas migrações adicionam o índice da fila técnica e ampliam o campo de mensagem do histórico, sem apagar os registros existentes.
 
 ### 3. Configurar a API
 
