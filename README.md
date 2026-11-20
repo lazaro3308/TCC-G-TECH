@@ -151,7 +151,6 @@ cd TCC-G-TECH
 3. Importe e execute `server/database/schema.sql`.
 4. O script prepara o banco `g_tech_suporte` e as tabelas utilizadas pela aplicação.
 5. Se o banco já existia antes desta atualização, execute também `server/database/migrations/001_indice_fila_tecnica.sql` para adicionar o índice dos filtros sem apagar os dados.
-5. Se o banco já existia antes desta atualização, execute também `server/database/migrations/001_indice_fila_tecnica.sql` para adicionar o índice dos filtros sem apagar os dados.
 
 ### 3. Configurar a API
 
@@ -229,8 +228,6 @@ O comando executa o script de build do cliente.
 | GET | `/chamados` | Listar chamados conforme o perfil |
 | PATCH | `/chamados/:id` | Atualizar status, resposta e responsável como técnico |
 | GET | `/tecnico/resumo` | Consultar indicadores do painel técnico |
-| GET | `/tecnico/responsaveis` | Listar técnicos ativos para atribuição |
-| GET | `/chamados/:id/historico` | Consultar histórico autorizado do chamado |
 | GET | `/tecnico/responsaveis` | Listar técnicos ativos para atribuição |
 | GET | `/chamados/:id/historico` | Consultar histórico autorizado do chamado |
 
