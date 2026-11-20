@@ -104,7 +104,7 @@ export default function TechnicianDashboard({ user, onLogout }) {
   async function toggleHistory(ticket) {
     const opening = !expandedHistory[ticket.id];
     setExpandedHistory(current => ({ ...current, [ticket.id]: opening }));
-    if (!opening || histories[ticket.id]) return;
+    if (!opening) return;
     setHistoryLoading(current => ({ ...current, [ticket.id]: true }));
     try {
       const rows = await getTicketHistory(ticket.codigo);
