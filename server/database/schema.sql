@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS historico_chamados (
   autor_id BIGINT UNSIGNED NOT NULL,
   status_anterior VARCHAR(40) NULL,
   status_novo VARCHAR(40) NULL,
-  mensagem VARCHAR(1000) NOT NULL,
+  mensagem TEXT NOT NULL,
   criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_historico_chamado FOREIGN KEY (chamado_id) REFERENCES chamados(id) ON DELETE CASCADE,
   CONSTRAINT fk_historico_autor FOREIGN KEY (autor_id) REFERENCES usuarios(id),
