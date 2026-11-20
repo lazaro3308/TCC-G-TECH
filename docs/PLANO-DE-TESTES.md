@@ -29,7 +29,16 @@ Este documento descreve casos a executar. Um caso listado não deve ser interpre
 | CT13 | Cliente consultar novamente após atualização técnica | Novo status e resposta aparecem na consulta | Alta |
 | CT14 | Encerrar sessão e consultar rota protegida | Sessão deixa de ser aceita | Alta |
 | CT15 | Enviar dados inválidos à API | API rejeita a requisição sem gravar dados inválidos | Alta |
-| CT16 | Executar build do cliente | Vite conclui a geração dos arquivos de produção | Média |\n| CT17 | Técnico atribuir chamado a técnico ativo | Responsável é salvo e evento aparece no histórico | Alta |\n| CT18 | Tentar atribuir chamado a usuário cliente/inativo | API rejeita a atribuição sem alterar o chamado | Alta |\n| CT19 | Remover responsável de um chamado | Campo fica sem responsável e evento é registrado | Média |\n| CT20 | Filtrar fila por status, prioridade e técnico | Somente chamados correspondentes são exibidos | Alta |\n| CT21 | Consultar histórico como cliente dono | Eventos do próprio chamado são retornados em ordem cronológica | Alta |\n| CT22 | Cliente consultar histórico de chamado alheio | API retorna 404 sem revelar o registro | Alta |\n| CT23 | Técnico alterar status | Evento contém status anterior, novo status, autor e data | Alta |\n| CT24 | Técnico registrar resposta | Resposta aparece ao cliente e evento é registrado | Alta |\n| CT25 | Executar migração em banco existente | Índice é criado sem apagar registros e pode ser executado novamente | Média |
+| CT16 | Executar build do cliente | Vite conclui a geração dos arquivos de produção | Média |
+| CT17 | Técnico atribuir chamado a técnico ativo | Responsável é salvo e evento aparece no histórico | Alta |
+| CT18 | Tentar atribuir chamado a usuário cliente/inativo | API rejeita a atribuição sem alterar o chamado | Alta |
+| CT19 | Remover responsável de um chamado | Campo fica sem responsável e evento é registrado | Média |
+| CT20 | Filtrar fila por status, prioridade e técnico | Somente chamados correspondentes são exibidos | Alta |
+| CT21 | Consultar histórico como cliente dono | Eventos do próprio chamado são retornados em ordem cronológica | Alta |
+| CT22 | Cliente consultar histórico de chamado alheio | API retorna 404 sem revelar o registro | Alta |
+| CT23 | Técnico alterar status | Evento contém status anterior, novo status, autor e data | Alta |
+| CT24 | Técnico registrar resposta | Resposta aparece ao cliente e evento é registrado | Alta |
+| CT25 | Executar migração em banco existente | Índice é criado sem apagar registros e pode ser executado novamente | Média |
 
 ## 3. Recursos ainda não implementados
 
