@@ -1,70 +1,108 @@
 # G-TECH
+### Sistema de Gestão de Serviços e Chamados de Suporte Técnico
 
-**Sistema de Gestão de Serviços e Chamados de Suporte Técnico**
+<p align="center">
+  <strong>Uma aplicação web para registrar, acompanhar e gerenciar solicitações de suporte técnico.</strong>
+</p>
 
-[![Status](https://img.shields.io/badge/status-em%20desenvolvimento-39FF14?style=flat-square)](#estado-atual)
-[![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
-[![Node.js](https://img.shields.io/badge/Node.js-API-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org/)
-[![Express](https://img.shields.io/badge/Express-5-000000?style=flat-square&logo=express&logoColor=white)](https://expressjs.com/)
-[![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?style=flat-square&logo=mysql&logoColor=white)](https://www.mysql.com/)\n[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+<p align="center">
+  <img src="https://img.shields.io/badge/Projeto-Acad%C3%AAmico-2563EB?style=for-the-badge" alt="Projeto acadêmico">
+  <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19">
+  <img src="https://img.shields.io/badge/Node.js-API-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js">
+  <img src="https://img.shields.io/badge/Express-5-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express 5">
+  <img src="https://img.shields.io/badge/MySQL-Database-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
+</p>
 
-O **G-TECH** é uma aplicação web para abertura, gerenciamento e acompanhamento de chamados de suporte técnico. O projeto possui uma área para clientes e um painel para a equipe técnica, conectados a uma API Node.js e a um banco de dados MySQL.
+O **G-TECH** é um projeto acadêmico de conclusão de curso (TCC) que propõe organizar o fluxo de atendimento de suporte técnico em uma aplicação web. O sistema possui uma área destinada aos clientes e um painel para a equipe técnica, integrados a uma API em Node.js e a um banco de dados MySQL.
 
-> Projeto acadêmico em desenvolvimento. A documentação diferencia funcionalidades já implementadas de recursos previstos para etapas futuras.
+A aplicação permite registrar solicitações, acompanhar seu andamento e atualizar os atendimentos pela área técnica. O repositório também reúne documentação de requisitos, arquitetura, modelagem de dados e planejamento de testes.
 
-## Funcionalidades implementadas
+> **Status:** em desenvolvimento. Este documento separa os recursos implementados daqueles que ainda estão planejados.
+
+---
+
+## Índice
+
+- [Problema e objetivo](#-problema-e-objetivo)
+- [Funcionalidades](#-funcionalidades-implementadas)
+- [Tecnologias](#-tecnologias)
+- [Arquitetura](#-arquitetura-do-projeto)
+- [Estrutura](#-estrutura-do-repositório)
+- [Pré-requisitos](#-pré-requisitos)
+- [Configuração e execução](#-configuração-e-execução)
+- [Rotas da API](#-principais-rotas-da-api)
+- [Documentação](#-documentação-do-projeto)
+- [Estado atual](#-estado-atual-e-próximas-etapas)
+- [Segurança](#-segurança)
+- [Licença](#-licença)
+
+## 🎯 Problema e objetivo
+
+Solicitações de suporte podem ficar difíceis de acompanhar quando são registradas sem padronização ou sem um histórico centralizado. O G-TECH busca oferecer um fluxo organizado para:
+
+- registrar chamados com informações relevantes;
+- permitir que clientes acompanhem suas solicitações;
+- oferecer à equipe técnica uma visão centralizada da fila;
+- registrar atualizações e respostas dos atendimentos.
+
+## ✨ Funcionalidades implementadas
 
 ### Área do cliente
-- Cadastro público de contas com perfil de cliente.
+
+- Cadastro de contas com perfil de cliente.
 - Login e encerramento de sessão.
 - Abertura de chamados com título, categoria, prioridade e descrição.
-- Confirmação após o envio, com protocolo do chamado.
-- Consulta dos próprios chamados e visualização de detalhes.
-- Acompanhamento de status e resposta técnica.
-- Atualização automática da lista de chamados e da tela de confirmação a cada 15 segundos enquanto a página está aberta.
+- Confirmação de abertura com protocolo.
+- Consulta dos próprios chamados e visualização dos detalhes.
+- Acompanhamento do status e da resposta técnica.
+- Atualização periódica da lista e da tela de confirmação enquanto a página está aberta.
 
 ### Painel técnico
-- Acesso por conta de técnico criada previamente.
+
+- Acesso por conta técnica previamente criada.
 - Visualização da fila geral de chamados.
 - Pesquisa e filtro por status.
 - Atualização do status do atendimento.
 - Registro de resposta técnica.
-- Resumo de indicadores de atendimento.
+- Exibição de indicadores resumidos de atendimento.
 
-### Segurança e API
+### API e proteção de acesso
+
 - Senhas armazenadas com hash bcrypt.
 - Sessão JWT em cookie HttpOnly.
 - Verificação de perfil e autorização no back-end.
 - Consultas MySQL parametrizadas.
-- Helmet, CORS configurado, limitação de requisições e validação de entradas.
+- Configuração de Helmet, CORS e limitação de requisições.
+- Validação de entradas.
 - Histórico de alterações dos chamados.
 
-## Tecnologias
+## 🧰 Tecnologias
 
 | Camada | Tecnologias |
 |---|---|
-| Front-end web | React 19, JavaScript, CSS, Vite |
-| Rotas da interface | React Router |
-| Ícones | Lucide React |
-| Back-end | Node.js, Express 5 |
+| Front-end | React 19, JavaScript, CSS e Vite |
+| Navegação | React Router |
+| Componentes e ícones | Lucide React |
+| Back-end | Node.js e Express 5 |
 | Banco de dados | MySQL |
 | Acesso ao banco | mysql2 |
 | Autenticação | JWT, bcryptjs e cookie-parser |
-| Aplicativo móvel | React Native + Expo — planejado |
+| Segurança HTTP | Helmet, CORS e limitação de requisições |
 | Versionamento | Git e GitHub |
 
-## Identidade visual
+## 🏗️ Arquitetura do projeto
 
-| Elemento | Cor |
-|---|---|
-| Preto | `#050505` |
-| Verde principal | `#39FF14` |
-| Verde escuro | `#151C18` |
+O sistema está dividido em duas aplicações principais:
 
-## Estrutura do repositório
+1. **Cliente web:** interface React responsável pelas telas de cadastro, autenticação, abertura e consulta de chamados.
+2. **API:** aplicação Node.js/Express responsável pelas regras de negócio, autenticação, autorização e comunicação com o MySQL.
+
+O banco de dados mantém os registros necessários para usuários, chamados e histórico de atendimento. A documentação técnica do repositório detalha os fluxos e a modelagem.
+
+## 📁 Estrutura do repositório
 
 ```text
-G-TECH/
+TCC-G-TECH/
 ├── client/
 │   ├── public/
 │   └── src/
@@ -80,23 +118,22 @@ G-TECH/
 │   │   └── criar-tecnico.js
 │   ├── index.js
 │   └── .env.example
-├── mobile/                 # etapa futura
 ├── docs/
-│   ├── assets/
 │   └── documentação técnica
-├── package.json            # atalhos para o Vite
+├── package.json
+├── vite.config.js
 └── README.md
 ```
 
-## Requisitos para executar
+## 💻 Pré-requisitos
 
 - Node.js (versão LTS recomendada).
 - npm.
 - MySQL 8 ou compatível.
 - Git.
-- XAMPP (opcional, pode ser usado para iniciar o MySQL e acessar o phpMyAdmin).
+- XAMPP é opcional; pode ser utilizado para iniciar o MySQL e acessar o phpMyAdmin.
 
-## Configuração do ambiente
+## 🚀 Configuração e execução
 
 ### 1. Clonar o projeto
 
@@ -107,12 +144,12 @@ cd TCC-G-TECH
 
 ### 2. Preparar o banco de dados
 
-1. Inicie o MySQL pelo XAMPP ou pelo serviço instalado na máquina.
+1. Inicie o serviço MySQL (por exemplo, pelo XAMPP).
 2. Abra o phpMyAdmin ou outro cliente MySQL.
 3. Importe e execute `server/database/schema.sql`.
-4. O script cria o banco `g_tech_suporte` e as tabelas necessárias.
+4. O script prepara o banco `g_tech_suporte` e as tabelas utilizadas pela aplicação.
 
-### 3. Configurar e iniciar a API
+### 3. Configurar a API
 
 No PowerShell:
 
@@ -121,7 +158,9 @@ cd server
 Copy-Item .env.example .env
 ```
 
-Edite `server/.env` com os dados do seu MySQL. Gere um valor aleatório e exclusivo para `JWT_SECRET`, com pelo menos 32 caracteres. Não compartilhe esse segredo e nunca envie o arquivo `.env` ao GitHub.
+Edite o arquivo `server/.env` com as credenciais e configurações do seu ambiente. Gere um valor aleatório e exclusivo para `JWT_SECRET`, com pelo menos 32 caracteres.
+
+**Nunca envie o arquivo `.env` ao GitHub.** Não compartilhe credenciais, tokens ou dados pessoais.
 
 Instale as dependências e inicie a API:
 
@@ -130,28 +169,28 @@ npm install
 npm run dev
 ```
 
-A API ficará disponível, por padrão, em `http://localhost:3000`. Verifique o funcionamento acessando:
+Por padrão, a API fica disponível em `http://localhost:3000`. Para verificar a disponibilidade, acesse:
 
 ```text
 http://localhost:3000/health
 ```
 
-A resposta esperada é um JSON com o status `ok`.
+A resposta esperada indica o status `ok`.
 
-### 4. Criar uma conta de técnico
+### 4. Criar uma conta técnica
 
-Com o banco e o arquivo `.env` configurados, abra outro terminal:
+Com o banco configurado e a API preparada, abra outro terminal:
 
 ```powershell
 cd server
 npm run create:technician
 ```
 
-O comando solicitará nome, e-mail e senha. A senha deve ter pelo menos 12 caracteres. O cadastro público da aplicação cria somente contas de cliente; contas técnicas são provisionadas por esse script.
+O script solicita nome, e-mail e senha. A senha deve ter pelo menos 12 caracteres. O cadastro público cria contas de cliente; contas técnicas são provisionadas por esse comando.
 
 ### 5. Iniciar o front-end
 
-Em outro terminal, na pasta raiz do projeto:
+Em outro terminal, a partir da raiz do projeto:
 
 ```powershell
 cd client
@@ -161,19 +200,19 @@ npm run dev
 
 Acesse o endereço local informado pelo Vite (normalmente `http://localhost:5173`).
 
-Se o Vite utilizar outra porta, atualize `CLIENT_ORIGIN` no arquivo `server/.env` para corresponder exatamente ao endereço exibido e reinicie a API.
+Se o Vite utilizar outra porta, ajuste `CLIENT_ORIGIN` no arquivo `server/.env` para corresponder exatamente à origem exibida e reinicie a API.
 
-### 6. Gerar a versão de produção do front-end
+### 6. Gerar o build do front-end
 
-Com as dependências do cliente instaladas, na raiz do repositório:
+Na raiz do repositório, com as dependências instaladas:
 
 ```powershell
 npm run build
 ```
 
-O comando raiz encaminha a execução para o script de build do diretório `client`.
+O comando executa o script de build do cliente.
 
-## Principais rotas da API
+## 🔌 Principais rotas da API
 
 | Método | Rota | Finalidade |
 |---|---|---|
@@ -187,7 +226,9 @@ O comando raiz encaminha a execução para o script de build do diretório `clie
 | PATCH | `/chamados/:id` | Atualizar chamado como técnico |
 | GET | `/tecnico/resumo` | Consultar indicadores do painel técnico |
 
-## Documentação
+## 📚 Documentação do projeto
+
+O repositório inclui documentos complementares:
 
 - [Autenticação e painel técnico](docs/AUTENTICACAO-E-PAINEL-TECNICO.md)
 - [Requisitos e regras de negócio](docs/REQUISITOS-E-REGRAS.md)
@@ -196,20 +237,34 @@ O comando raiz encaminha a execução para o script de build do diretório `clie
 - [Estrutura do projeto](docs/ESTRUTURA-DO-PROJETO.md)
 - [Plano de testes](docs/PLANO-DE-TESTES.md)
 
-## Estado atual e próximos passos
+## 📌 Estado atual e próximas etapas
 
-**Já implementado:** autenticação de cliente e técnico, abertura e consulta de chamados, painel técnico, atualização de status/resposta, confirmação de abertura e acompanhamento periódico.
+**Implementado:** autenticação de clientes e técnicos, abertura e consulta de chamados, painel técnico, atualização de status e resposta, confirmação de abertura e acompanhamento periódico.
 
-**Ainda previsto ou pendente de evolução:** perfis administrativos e de funcionários, atribuição manual de técnicos, edição de perfil, anexos, notificações em tempo real, recuperação de senha, MFA, auditoria ampliada, testes automatizados, aplicativo móvel e preparação completa para produção.
+**Planejado ou pendente de evolução:** perfis administrativos e de funcionários, atribuição manual de técnicos, edição de perfil, anexos, notificações em tempo real, recuperação de senha, autenticação multifator, auditoria ampliada, testes automatizados, aplicativo móvel e preparação completa para produção.
 
-A atualização de acompanhamento utiliza consultas periódicas (polling) a cada 15 segundos enquanto a tela está aberta. Isso não equivale a notificações push, e-mail ou atualização em tempo real por WebSocket.
+A atualização automática atual utiliza *polling* a cada 15 segundos enquanto a tela está aberta. Isso não equivale a notificações push, e-mail ou comunicação em tempo real por WebSocket.
 
-## Segurança
+## 🔐 Segurança
 
-A implementação atual fornece controles básicos, mas ainda não representa uma certificação ou garantia de segurança para produção. Antes de disponibilizar o sistema publicamente, configure HTTPS, `COOKIE_SECURE=true`, segredo exclusivo e forte, usuário MySQL com privilégios mínimos, proteção CSRF adequada, backups, monitoramento e testes de segurança/autorização.
+O projeto possui controles básicos de segurança, mas ainda requer revisão e configuração antes de qualquer implantação pública. Para um ambiente de produção, avalie e implemente, entre outros pontos:
 
-Nunca versione `.env`, senhas, tokens ou dados pessoais.
+- HTTPS e cookies seguros (`COOKIE_SECURE=true`);
+- segredo JWT forte, exclusivo e protegido;
+- usuário MySQL com privilégios mínimos;
+- proteção CSRF adequada ao modelo de autenticação;
+- backups, monitoramento e registro de eventos;
+- testes de autorização e segurança.
 
-## Licença
+Nunca versione arquivos `.env`, senhas, tokens ou dados pessoais. Use apenas dados fictícios em demonstrações públicas.
 
-Este projeto é distribuído sob os termos da **Apache License 2.0**. Consulte o arquivo [LICENSE](LICENSE) para ver o texto completo da licença.\n\nA licença se aplica ao código deste repositório, respeitando avisos de copyright e licenças de terceiros. Bibliotecas, frameworks, ícones e demais dependências mantêm suas próprias licenças.
+## 📄 Licença
+
+Este projeto está distribuído sob os termos da **Apache License 2.0**. Consulte o arquivo [LICENSE](LICENSE) para o texto completo. Bibliotecas, frameworks e demais dependências mantêm suas próprias licenças.
+
+---
+
+<p align="center">
+  <strong>G-TECH — organização e acompanhamento do suporte técnico.</strong><br>
+  Projeto acadêmico desenvolvido por <a href="https://github.com/lazaro3308">lazaro3308</a>.
+</p>
