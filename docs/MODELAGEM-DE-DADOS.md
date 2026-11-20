@@ -100,6 +100,10 @@ Os estados aceitos pelo schema atual são:
 
 As tabelas utilizam InnoDB e chaves estrangeiras. Índices apoiam consultas por perfil/estado, cliente e data. O histórico registra a abertura, mudanças de status, atribuições e remoção de responsável, além de novas respostas técnicas. O índice `idx_chamados_tecnico_status_data` apoia os filtros do painel por técnico, status e data.
 
-## 6. Migração de bancos existentes\n\nO schema de instalação nova já inclui o índice da fila técnica. Para bancos que já foram criados anteriormente, execute uma única vez `server/database/migrations/001_indice_fila_tecnica.sql` no phpMyAdmin. A migração verifica se o índice existe antes de criá-lo e não apaga nem recria registros.\n\n## 7. Evoluções previstas
+## 6. Migração de bancos existentes
+
+O schema de instalação nova já inclui o índice da fila técnica. Para bancos que já foram criados anteriormente, execute uma única vez `server/database/migrations/001_indice_fila_tecnica.sql` no phpMyAdmin. A migração verifica se o índice existe antes de criá-lo e não apaga nem recria registros.
+
+## 7. Evoluções previstas
 
 A modelagem poderá ser ampliada para incluir comentários públicos e internos, anexos, notificações, avaliações, categorias administráveis, permissões mais granulares e trilha de auditoria. Qualquer evolução deverá atualizar o script SQL e este documento em conjunto.
