@@ -273,7 +273,8 @@ app.get("/chamados", auth, async (req, res) => {
       if (prioridade && !priorities.includes(prioridade)) {
         return res.status(400).json({ mensagem: "Filtro de prioridade inválido." });
       }
-      if (technicianId && (!/^\d+$/.test(String(technicianId)) || Number(technicianId) < 1)) {
+      if (technicianId && technicianId !== "sem_responsavel" &&
+          (!/^\d+$/.test(String(technicianId)) || Number(technicianId) < 1)) {
         return res.status(400).json({ mensagem: "Filtro de responsável inválido." });
       }
 
