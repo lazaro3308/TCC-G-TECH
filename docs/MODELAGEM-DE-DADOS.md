@@ -102,7 +102,7 @@ As tabelas utilizam InnoDB e chaves estrangeiras. Índices apoiam consultas por 
 
 ## 6. Migração de bancos existentes
 
-O schema de instalação nova já inclui o índice da fila técnica. Para bancos que já foram criados anteriormente, execute uma única vez `server/database/migrations/001_indice_fila_tecnica.sql` no phpMyAdmin. A migração verifica se o índice existe antes de criá-lo e não apaga nem recria registros.
+O schema de instalação nova já inclui o índice da fila técnica. Para bancos que já foram criados anteriormente, execute `server/database/migrations/001_indice_fila_tecnica.sql` e `server/database/migrations/002_historico_mensagem_texto.sql` no phpMyAdmin. A primeira verifica se o índice existe antes de criá-lo; a segunda amplia o tipo da coluna de mensagem sem apagar os eventos existentes.
 
 ## 7. Evoluções previstas
 
