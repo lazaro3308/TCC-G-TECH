@@ -61,9 +61,10 @@ Solicitações de suporte podem ficar difíceis de acompanhar quando são regist
 
 - Acesso por conta técnica previamente criada.
 - Visualização da fila geral de chamados.
-- Pesquisa e filtro por status.
-- Atualização do status do atendimento.
-- Registro de resposta técnica.
+- Pesquisa e filtros combináveis por status, prioridade e responsável.
+- Atribuição e remoção de técnico responsável, com validação no servidor.
+- Atualização do status e registro de resposta técnica.
+- Histórico cronológico de abertura, atribuições, alterações e respostas.
 - Exibição de indicadores resumidos de atendimento.
 
 ### API e proteção de acesso
@@ -74,7 +75,8 @@ Solicitações de suporte podem ficar difíceis de acompanhar quando são regist
 - Consultas MySQL parametrizadas.
 - Configuração de Helmet, CORS e limitação de requisições.
 - Validação de entradas.
-- Histórico transacional de abertura, atribuições, alterações de status e respostas técnicas.\n- Autorização para impedir que clientes consultem o histórico de outros clientes.
+- Histórico transacional de abertura, atribuições, alterações de status e respostas técnicas.
+- Autorização para impedir que clientes consultem o histórico de outros clientes.
 
 ## 🧰 Tecnologias
 
@@ -147,7 +149,9 @@ cd TCC-G-TECH
 1. Inicie o serviço MySQL (por exemplo, pelo XAMPP).
 2. Abra o phpMyAdmin ou outro cliente MySQL.
 3. Importe e execute `server/database/schema.sql`.
-4. O script prepara o banco `g_tech_suporte` e as tabelas utilizadas pela aplicação.\n5. Se o banco já existia antes desta atualização, execute também `server/database/migrations/001_indice_fila_tecnica.sql` para adicionar o índice dos filtros sem apagar os dados.
+4. O script prepara o banco `g_tech_suporte` e as tabelas utilizadas pela aplicação.
+5. Se o banco já existia antes desta atualização, execute também `server/database/migrations/001_indice_fila_tecnica.sql` para adicionar o índice dos filtros sem apagar os dados.
+5. Se o banco já existia antes desta atualização, execute também `server/database/migrations/001_indice_fila_tecnica.sql` para adicionar o índice dos filtros sem apagar os dados.
 
 ### 3. Configurar a API
 
@@ -224,7 +228,11 @@ O comando executa o script de build do cliente.
 | POST | `/chamados` | Criar chamado como cliente |
 | GET | `/chamados` | Listar chamados conforme o perfil |
 | PATCH | `/chamados/:id` | Atualizar status, resposta e responsável como técnico |
-| GET | `/tecnico/resumo` | Consultar indicadores do painel técnico |\n| GET | `/tecnico/responsaveis` | Listar técnicos ativos para atribuição |\n| GET | `/chamados/:id/historico` | Consultar histórico autorizado do chamado |
+| GET | `/tecnico/resumo` | Consultar indicadores do painel técnico |
+| GET | `/tecnico/responsaveis` | Listar técnicos ativos para atribuição |
+| GET | `/chamados/:id/historico` | Consultar histórico autorizado do chamado |
+| GET | `/tecnico/responsaveis` | Listar técnicos ativos para atribuição |
+| GET | `/chamados/:id/historico` | Consultar histórico autorizado do chamado |
 
 ## 📚 Documentação do projeto
 
@@ -239,9 +247,9 @@ O repositório inclui documentos complementares:
 
 ## 📌 Estado atual e próximas etapas
 
-**Implementado:** autenticação de clientes e técnicos, abertura e consulta de chamados, painel técnico, atualização de status e resposta, confirmação de abertura e acompanhamento periódico.
+**Implementado:** autenticação de clientes e técnicos, abertura e consulta de chamados, painel técnico, atribuição de responsáveis, filtros por status/prioridade/técnico, histórico cronológico, atualização de status e resposta, confirmação de abertura e acompanhamento periódico.
 
-**Planejado ou pendente de evolução:** perfis administrativos e de funcionários, atribuição manual de técnicos, edição de perfil, anexos, notificações em tempo real, recuperação de senha, autenticação multifator, auditoria ampliada, testes automatizados, aplicativo móvel e preparação completa para produção.
+**Planejado ou pendente de evolução:** perfis administrativos e de funcionários, edição de perfil, anexos, notificações em tempo real, recuperação de senha, autenticação multifator, auditoria ampliada, testes automatizados e aplicativo móvel.
 
 A atualização automática atual utiliza *polling* a cada 15 segundos enquanto a tela está aberta. Isso não equivale a notificações push, e-mail ou comunicação em tempo real por WebSocket.
 
