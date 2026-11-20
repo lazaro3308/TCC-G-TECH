@@ -85,9 +85,17 @@ Se o Vite escolher uma porta diferente de 5173, atualize `CLIENT_ORIGIN` no `ser
 | POST | `/chamados` | Cliente — abre chamado |
 | GET | `/chamados` | Cliente — próprios chamados; técnico — fila geral |
 | PATCH | `/chamados/:id` | Técnico — atualiza status, resposta e responsável |
-| GET | `/tecnico/resumo` | Técnico — indicadores |\n| GET | `/tecnico/responsaveis` | Técnico — lista de técnicos ativos para atribuição |\n| GET | `/chamados/:id/historico` | Cliente dono do chamado ou técnico — histórico do atendimento |
+| GET | `/tecnico/resumo` | Técnico — indicadores |
+| GET | `/tecnico/responsaveis` | Técnico — lista de técnicos ativos para atribuição |
+| GET | `/chamados/:id/historico` | Cliente dono do chamado ou técnico — histórico do atendimento |
 
-## 8. Gestão, atribuição e histórico\n\nNo painel técnico, a equipe pode atribuir ou remover o responsável de um chamado, alterar o status e registrar uma resposta ao cliente. Os filtros permitem combinar status, prioridade e responsável, incluindo chamados ainda sem atribuição. A API valida que o responsável selecionado seja uma conta técnica ativa.\n\nO endpoint de histórico retorna eventos em ordem cronológica. Clientes só podem consultar o histórico dos próprios chamados; técnicos autenticados podem consultar a fila. A abertura, alteração de status, atribuição e resposta são registradas na mesma transação da atualização correspondente.\n\n## 9. Fluxo de acompanhamento
+## 8. Gestão, atribuição e histórico
+
+No painel técnico, a equipe pode atribuir ou remover o responsável de um chamado, alterar o status e registrar uma resposta ao cliente. Os filtros permitem combinar status, prioridade e responsável, incluindo chamados ainda sem atribuição. A API valida que o responsável selecionado seja uma conta técnica ativa.
+
+O endpoint de histórico retorna eventos em ordem cronológica. Clientes só podem consultar o histórico dos próprios chamados; técnicos autenticados podem consultar a fila. A abertura, alteração de status, atribuição e resposta são registradas na mesma transação da atualização correspondente.
+
+## 9. Fluxo de acompanhamento
 
 Após criar um chamado, o cliente é direcionado à tela de confirmação, que apresenta o protocolo e o estado atual. A aplicação consulta a API periodicamente, a cada 15 segundos, enquanto a tela/lista está aberta. O cliente também pode abrir os detalhes do chamado para consultar a resposta técnica.
 
