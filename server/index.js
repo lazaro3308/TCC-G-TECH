@@ -426,7 +426,7 @@ app.patch("/chamados/:id", auth, technician, async (req, res) => {
     if (hasReply && body.resposta.trim() && body.resposta.trim() !== (current.resposta_tecnica || "")) {
       await connection.execute(
         "INSERT INTO historico_chamados(chamado_id,autor_id,mensagem) VALUES(?,?,?)",
-        [current.id, req.user.id, "Resposta técnica registrada: " + body.resposta.trim().slice(0, 940)],
+        [current.id, req.user.id, "Resposta técnica registrada: " + body.resposta.trim()],
       );
     }
 
