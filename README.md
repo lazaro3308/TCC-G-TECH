@@ -245,7 +245,7 @@ O comando executa o script de build do cliente.
 | PATCH | `/admin/solicitacoes/:id` | Aprovar ou recusar solicitação |
 | GET | `/admin/tecnicos` | Listar equipe técnica |
 | PATCH | `/admin/tecnicos/:id` | Ativar ou desativar técnico |
-| POST | `/auth/login` | Autenticar cliente ou técnico |
+| POST | `/auth/login` | Autenticar cliente, técnico ou administrador |
 | POST | `/auth/logout` | Encerrar sessão |
 | GET | `/auth/me` | Consultar usuário autenticado |
 | POST | `/chamados` | Criar chamado como cliente |
