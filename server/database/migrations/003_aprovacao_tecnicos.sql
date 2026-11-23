@@ -20,5 +20,5 @@ CREATE TABLE IF NOT EXISTS solicitacoes_tecnicos (
   criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_solicitacao_admin FOREIGN KEY (analisado_por) REFERENCES usuarios(id),
   INDEX idx_solicitacoes_status_data (status, criado_em),
-  INDEX idx_solicitacoes_email (email)
+  UNIQUE KEY uq_solicitacoes_tecnicos_email (email)
 ) ENGINE=InnoDB;
