@@ -208,7 +208,11 @@ app.post("/auth/register-technician", authLimit, async (req, res) => {
     return res.status(201).json({ mensagem: "Solicitação enviada. Aguarde a aprovação do administrador." });
   } catch (error) {
     console.error("Solicitação de técnico:", error.code);
-    return res.status(500).json({ mensagem: "Não foi possível enviar a solicitação." });
+    return res.status(error.code === "ER_DUP_ENTRY" ? 409 : 500).json({
+      mensagem: error.code === "ER_DUP_ENTRY"
+        ? "Já existe uma solicitação para este e-mail."
+        : "Não foi possível enviar a solicitação.",
+    });
   }
 });
 
@@ -348,6 +352,26 @@ app.get("/admin/tecnicos", auth, administrator, async (_req, res) => {
   } catch (error) {
     console.error("Lista administrativa de técnicos:", error.code);
     return res.status(500).json({ mensagem: "Falha ao consultar técnicos." });
+  }
+});
+
+
+app.patch("/admin/tecnicos/:id", auth, administrator, async (req, res) => {
+  const id = Number(req.params.id);
+  const { ativo } = req.body || {};
+  if (!Number.isSafeInteger(id) || id < 1 || typeof ativo !== "boolean") {
+    return res.status(400).json({ mensagem: "Identificação ou estado inválido." });
+  }
+  try {
+    const [result] = await db.execute(
+      "UPDATE usuarios SET ativo=? WHERE id=? AND perfil='tecnico'",
+      [ativo ? 1 : 0, id],
+    );
+    if (!result.affectedRows) return res.status(404).json({ mensagem: "Técnico não encontrado." });
+    return res.json({ mensagem: ativo ? "Acesso do técnico reativado." : "Acesso do técnico desativado." });
+  } catch (error) {
+    console.error("Estado do técnico:", error.code);
+    return res.status(500).json({ mensagem: "Não foi possível alterar o acesso do técnico." });
   }
 });
 
