@@ -54,7 +54,7 @@ app.use(helmet());
 app.use(cors({
   origin: (requestOrigin, callback) => {
     if (isAllowedClientOrigin(requestOrigin, origin, production)) return callback(null, true);
-    return callback(new Error("Origem não autorizada."));
+    return callback(null, false);
   },
   credentials: true,
   methods: ["GET", "POST", "PATCH", "OPTIONS"],
