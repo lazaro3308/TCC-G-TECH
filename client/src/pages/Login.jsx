@@ -69,7 +69,7 @@ export default function Login({onLogin}){
         {notice&&<p className="feedback success" role="status">{notice}</p>}
         <button className="button-primary button-wide" disabled={busy}>{busy?"Aguarde...":technicianRegistration?"Criar conta técnica":mode==="register"?"Criar conta":"Entrar"} <ArrowRight size={18}/></button>
         {perfil==="cliente"&&<p className="auth-switch">{mode==="login"?"Ainda não tem conta?":"Já possui cadastro?"} <button type="button" onClick={()=>{setMode(mode==="login"?"register":"login");setError("");setNotice("");}}>{mode==="login"?"Criar conta":"Fazer login"}</button></p>}
-        {perfil==="tecnico"&&<p className="auth-switch">{technicianRegistration?"Já possui cadastro?":"Ainda não tem acesso?"} <button type="button" onClick={()=>{setMode(technicianRegistration?"login":"technician-register");setError("");setNotice("");}}>{technicianRegistration?"Voltar ao login":"Criar conta técnica"}</button></p>}
+        {perfil==="tecnico"&&<div className="auth-switch auth-switch-technical">{technicianRegistration?<><span>Já possui cadastro?</span><button className="auth-switch-link" type="button" onClick={()=>{setMode("login");setError("");setNotice("");}}>Voltar ao login</button></>:<><span>Ainda não tem acesso?</span><button className="auth-switch-cta" type="button" onClick={()=>{setMode("technician-register");setError("");setNotice("");}}><UserPlus size={16}/> Criar conta técnica</button></>}</div>}
         <div className="demo-note"><ShieldCheck size={17}/><span><strong>Autenticação protegida</strong> — o cadastro técnico cria uma conta ativa e permite entrar imediatamente.</span></div>
       </form>
     </section>

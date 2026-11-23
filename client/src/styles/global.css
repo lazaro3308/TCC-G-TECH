@@ -2097,3 +2097,43 @@ tbody tr:hover {
 .ticket-history-heading button:disabled{opacity:.55;cursor:wait}
 .history-feedback{margin:12px 0;color:#91a18d;font-size:10px;line-height:1.6}
 .detail-metadata{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+
+
+/* AÇÃO DE CADASTRO TÉCNICO — DESTAQUE NO LOGIN */
+.auth-switch-technical {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding-top: 5px;
+  color: #a3b09f;
+  font-size: 11px;
+}
+.auth-switch-technical .auth-switch-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid #477b3d;
+  border-radius: 8px;
+  background: #142116;
+  color: #a5ff91;
+  font-size: 12px;
+  font-weight: 800;
+  transition: .2s;
+}
+.auth-switch-technical .auth-switch-cta:hover {
+  border-color: var(--green);
+  background: #1b2d1b;
+  box-shadow: 0 0 18px #39ff1418;
+}
+.auth-switch-technical .auth-switch-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 800;
+}
