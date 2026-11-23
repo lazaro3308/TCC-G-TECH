@@ -10,7 +10,7 @@ export default function NewTicket({onCreate}) {
     if(form.title.trim().length<5||form.description.trim().length<15||!form.category){setError("Informe um título, uma categoria e uma descrição com pelo menos 15 caracteres.");return;}
     setLoading(true);setError("");
     try {const ticket=await onCreate(form);navigate(`/chamado-sucesso/${encodeURIComponent(ticket.id)}`,{state:{ticket}});}
-    catch {setError("Não foi possível registrar o chamado. Tente novamente.");}
+    catch (err) {setError(err.message || "Não foi possível registrar o chamado. Tente novamente.");}
     finally {setLoading(false);}
   }
   return <div className="form-page"><button className="back-link" onClick={()=>navigate(-1)}><ArrowLeft size={16}/> Voltar</button><section className="content-card form-card">
