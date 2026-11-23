@@ -9,6 +9,7 @@ const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const mysql = require("mysql2/promise");
 const crypto = require("node:crypto");
+const { isValidEmail, validateTicketPayload, isAllowedClientOrigin } = require("./utils/validation");
 
 const app = express();
 const PORT = +(process.env.PORT || 3000);
@@ -51,7 +52,10 @@ const priorities = ["Baixa", "Normal", "Alta", "Urgente"];
 app.disable("x-powered-by");
 app.use(helmet());
 app.use(cors({
-  origin,
+  origin: (requestOrigin, callback) => {
+    if (isAllowedClientOrigin(requestOrigin, origin, production)) return callback(null, true);
+    return callback(null, false);
+  },
   credentials: true,
   methods: ["GET", "POST", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type"],
@@ -75,17 +79,14 @@ app.use((req, res, next) => {
   if (
     ["POST", "PATCH", "PUT", "DELETE"].includes(req.method) &&
     req.path !== "/health" &&
-    req.get("origin") !== origin
+    !isAllowedClientOrigin(req.get("origin"), origin, production)
   ) {
     return res.status(403).json({ mensagem: "Origem não autorizada." });
   }
   next();
 });
 
-const emailOK = (email) =>
-  typeof email === "string" &&
-  email.length <= 190 &&
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+const emailOK = isValidEmail;
 
 function issueSession(res, user) {
   const token = jwt.sign(
@@ -197,36 +198,17 @@ app.post("/auth/register-technician", authLimit, async (req, res) => {
 
   const normalizedEmail = email.trim().toLowerCase();
   try {
-    const [users] = await db.execute("SELECT id FROM usuarios WHERE email=? LIMIT 1", [normalizedEmail]);
-    if (users.length) return res.status(409).json({ mensagem: "Este e-mail já possui uma conta." });
-
-    const [existing] = await db.execute(
-      "SELECT id,status FROM solicitacoes_tecnicos WHERE email=? LIMIT 1",
-      [normalizedEmail],
+    const [result] = await db.execute(
+      "INSERT INTO usuarios(nome,email,senha_hash,telefone,perfil,ativo) VALUES(?,?,?,?, 'tecnico', 1)",
+      [nome.trim(), normalizedEmail, await bcrypt.hash(senha, 12), telefone?.trim() || null],
     );
-    if (existing[0] && existing[0].status !== "recusada") {
-      return res.status(409).json({ mensagem: "Já existe uma solicitação para este e-mail." });
-    }
-
-    const passwordHash = await bcrypt.hash(senha, 12);
-    if (existing[0]) {
-      await db.execute(
-        "UPDATE solicitacoes_tecnicos SET nome=?,senha_hash=?,telefone=?,status='pendente',analisado_por=NULL,analisado_em=NULL,motivo_recusa=NULL WHERE id=?",
-        [nome.trim(), passwordHash, telefone || null, existing[0].id],
-      );
-    } else {
-      await db.execute(
-        "INSERT INTO solicitacoes_tecnicos(nome,email,senha_hash,telefone) VALUES(?,?,?,?)",
-        [nome.trim(), normalizedEmail, passwordHash, telefone || null],
-      );
-    }
-    return res.status(201).json({ mensagem: "Solicitação enviada. Aguarde a aprovação do administrador." });
+    const user = { id: result.insertId, nome: nome.trim(), email: normalizedEmail, perfil: "tecnico", empresa: "" };
+    issueSession(res, user);
+    return res.status(201).json({ mensagem: "Cadastro técnico concluído. Sua conta já está ativa.", usuario: user });
   } catch (error) {
-    console.error("Solicitação de técnico:", error.code);
+    console.error("Cadastro técnico:", error.code);
     return res.status(error.code === "ER_DUP_ENTRY" ? 409 : 500).json({
-      mensagem: error.code === "ER_DUP_ENTRY"
-        ? "Já existe uma solicitação para este e-mail."
-        : "Não foi possível enviar a solicitação.",
+      mensagem: error.code === "ER_DUP_ENTRY" ? "Este e-mail já possui uma conta." : "Não foi possível concluir o cadastro técnico.",
     });
   }
 });
@@ -395,15 +377,9 @@ app.post("/chamados", auth, async (req, res) => {
     return res.status(403).json({ mensagem: "Somente clientes podem abrir chamados." });
   }
 
-  const { titulo, categoria, prioridade, descricao } = req.body || {};
-  if (
-    typeof titulo !== "string" || titulo.trim().length < 4 || titulo.length > 160 ||
-    typeof categoria !== "string" || categoria.trim().length < 2 || categoria.length > 80 ||
-    !priorities.includes(prioridade) ||
-    typeof descricao !== "string" || descricao.trim().length < 10 || descricao.length > 5000
-  ) {
-    return res.status(400).json({ mensagem: "Revise os dados do chamado." });
-  }
+  const ticketValidationError = validateTicketPayload(req.body);
+  if (ticketValidationError) return res.status(400).json({ mensagem: ticketValidationError });
+  const { titulo, categoria, prioridade, descricao } = req.body;
 
   const codigo = "GT-" + new Date().getFullYear() + "-" +
     crypto.randomBytes(4).toString("hex").toUpperCase();

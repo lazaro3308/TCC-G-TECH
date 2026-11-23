@@ -24,8 +24,7 @@ export default function Login({onLogin}){
       if(mode==="technician-register"){
         if(senha!==confirmarSenha)throw new Error("As senhas não coincidem.");
         const result=await requestTechnicianAccount({nome,email,senha,telefone});
-        setNotice(result.mensagem || "Solicitação enviada. Aguarde a aprovação.");
-        setMode("login");setSenha("");setConfirmarSenha("");
+        onLogin(result.user);
         return;
       }
       if(mode==="register"){
@@ -55,7 +54,7 @@ export default function Login({onLogin}){
       <form className="auth-form" onSubmit={submit}>
         <div className="mobile-auth-brand"><span className="brand-mark">G</span> G-TECH</div>
         <span className="eyebrow">{perfil==="tecnico"?"ACESSO DA EQUIPE TÉCNICA":perfil==="admin"?"ÁREA ADMINISTRATIVA":"PORTAL DO CLIENTE"}</span>
-        <h2>{technicianRegistration?"Solicitar cadastro técnico":mode==="register"?"Criar conta de cliente":"Acesse sua conta"}</h2>
+        <h2>{technicianRegistration?"Cadastro técnico":mode==="register"?"Criar conta de cliente":"Acesse sua conta"}</h2>
         <p className="muted">Escolha como deseja acessar a plataforma.</p>
         <label>Tipo de acesso<select value={perfil} onChange={e=>changeProfile(e.target.value)} disabled={registering}>
           <option value="cliente">Sou cliente</option><option value="tecnico">Sou técnico</option><option value="admin">Sou administrador</option>
@@ -68,10 +67,10 @@ export default function Login({onLogin}){
         {registering&&<label>Confirmar senha<input type="password" value={confirmarSenha} onChange={e=>setConfirmarSenha(e.target.value)} autoComplete="new-password" minLength="12" maxLength="128" required/></label>}
         {error&&<p className="form-error" role="alert">{error}</p>}
         {notice&&<p className="feedback success" role="status">{notice}</p>}
-        <button className="button-primary button-wide" disabled={busy}>{busy?"Aguarde...":technicianRegistration?"Enviar solicitação":mode==="register"?"Criar conta":"Entrar"} <ArrowRight size={18}/></button>
+        <button className="button-primary button-wide" disabled={busy}>{busy?"Aguarde...":technicianRegistration?"Criar conta técnica":mode==="register"?"Criar conta":"Entrar"} <ArrowRight size={18}/></button>
         {perfil==="cliente"&&<p className="auth-switch">{mode==="login"?"Ainda não tem conta?":"Já possui cadastro?"} <button type="button" onClick={()=>{setMode(mode==="login"?"register":"login");setError("");setNotice("");}}>{mode==="login"?"Criar conta":"Fazer login"}</button></p>}
-        {perfil==="tecnico"&&<p className="auth-switch">{technicianRegistration?"Já solicitou cadastro?":"Ainda não tem acesso?"} <button type="button" onClick={()=>{setMode(technicianRegistration?"login":"technician-register");setError("");setNotice("");}}>{technicianRegistration?"Voltar ao login":"Solicitar cadastro"}</button></p>}
-        <div className="demo-note"><ShieldCheck size={17}/><span><strong>Autenticação protegida</strong> — solicitações de técnicos precisam ser aprovadas pela administração antes do primeiro acesso.</span></div>
+        {perfil==="tecnico"&&<p className="auth-switch">{technicianRegistration?"Já possui cadastro?":"Ainda não tem acesso?"} <button type="button" onClick={()=>{setMode(technicianRegistration?"login":"technician-register");setError("");setNotice("");}}>{technicianRegistration?"Voltar ao login":"Criar conta técnica"}</button></p>}
+        <div className="demo-note"><ShieldCheck size={17}/><span><strong>Autenticação protegida</strong> — o cadastro técnico cria uma conta ativa e permite entrar imediatamente.</span></div>
       </form>
     </section>
   </main>;

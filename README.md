@@ -60,10 +60,9 @@ Solicitações de suporte podem ficar difíceis de acompanhar quando são regist
 
 ### Cadastro e administração de técnicos
 
-- Solicitação pública de cadastro técnico, sem liberação imediata.
-- Aprovação ou recusa por administrador autenticado.
-- Criação da conta técnica somente após aprovação.
-- Consulta da equipe e ativação/desativação de contas técnicas.
+- Cadastro público de técnicos com criação imediata de conta ativa.
+- Login automático após o cadastro técnico e acesso direto ao painel.
+- Consulta da equipe e ativação/desativação de contas técnicas pelo painel administrativo.
 - Primeiro administrador provisionado por script local, sem cadastro público.
 
 ### Painel técnico
@@ -159,7 +158,7 @@ cd TCC-G-TECH
 2. Abra o phpMyAdmin ou outro cliente MySQL.
 3. Importe e execute `server/database/schema.sql`.
 4. O script prepara o banco `g_tech_suporte` e as tabelas utilizadas pela aplicação.
-5. **Banco já existente:** faça um backup antes de qualquer alteração. Execute, nesta ordem, `server/database/migrations/001_indice_fila_tecnica.sql`, `002_historico_mensagem_texto.sql` e `003_aprovacao_tecnicos.sql`. A terceira migração adiciona o perfil administrativo e a tabela de solicitações, preservando os registros existentes. Não é necessário recriar o banco.
+5. **Banco já existente:** faça um backup antes de qualquer alteração. Execute, nesta ordem, `server/database/migrations/001_indice_fila_tecnica.sql`, `002_historico_mensagem_texto.sql` e `003_aprovacao_tecnicos.sql`. A migração 003 habilita o perfil administrativo e cria uma tabela histórica de solicitações; ela pode permanecer no banco, mas não participa do cadastro técnico atual. Execute somente migrações ainda não aplicadas. Se já existirem solicitações técnicas pendentes que devam virar contas ativas, execute também `004_ativar_solicitacoes_tecnicos.sql` após a 003. Essa migração preserva o histórico e não altera contas já existentes. Não é necessário recriar o banco nem apagar registros.
 
 ### 3. Configurar a API
 
@@ -191,24 +190,17 @@ A resposta esperada indica o status `ok`.
 
 ### 4. Criar uma conta técnica
 
-Com o banco configurado e a API preparada, abra outro terminal:
+Na tela de login, selecione **Sou técnico** e escolha **Criar conta técnica**. Informe nome, e-mail e senha (mínimo de 12 caracteres). A conta é criada ativa e o sistema abre o painel técnico automaticamente. Nos próximos acessos, basta selecionar **Sou técnico** e entrar com suas credenciais.
 
-```powershell
-cd server
-npm run create:technician
-```
+### 5. Criar o primeiro administrador (opcional)
 
-O script solicita nome, e-mail e senha. A senha deve ter pelo menos 12 caracteres. O cadastro público cria contas de cliente; contas técnicas são provisionadas por esse comando.
-
-### 5. Criar o primeiro administrador
-
-Depois de aplicar a migração 003 e configurar a API, execute em outro terminal, dentro de `server`:
+O painel administrativo é opcional para o cadastro e acesso de técnicos. Se precisar dele para gerenciar a equipe, execute em outro terminal, dentro de `server`:
 
 ```powershell
 npm run create:admin
 ```
 
-O script cria o primeiro administrador e bloqueia novas criações quando já existe um. Consulte [Administração e aprovação de técnicos](docs/ADMINISTRACAO-E-APROVACAO-TECNICOS.md) para o fluxo completo.
+O script cria o primeiro administrador e bloqueia novas criações quando já existe um. Consulte [Cadastro e administração de técnicos](docs/ADMINISTRACAO-E-APROVACAO-TECNICOS.md).
 
 ### 6. Iniciar o front-end
 
@@ -240,9 +232,7 @@ O comando executa o script de build do cliente.
 |---|---|---|
 | GET | `/health` | Verificar disponibilidade da API |
 | POST | `/auth/register` | Cadastrar cliente |
-| POST | `/auth/register-technician` | Solicitar cadastro técnico |
-| GET | `/admin/solicitacoes` | Listar solicitações como administrador |
-| PATCH | `/admin/solicitacoes/:id` | Aprovar ou recusar solicitação |
+| POST | `/auth/register-technician` | Criar conta técnica ativa e iniciar sessão |
 | GET | `/admin/tecnicos` | Listar equipe técnica |
 | PATCH | `/admin/tecnicos/:id` | Ativar ou desativar técnico |
 | POST | `/auth/login` | Autenticar cliente, técnico ou administrador |
@@ -269,9 +259,9 @@ O repositório inclui documentos complementares:
 
 ## 📌 Estado atual e próximas etapas
 
-**Implementado:** autenticação de clientes, técnicos e administradores; solicitação e aprovação de cadastro técnico; gestão de acesso técnico; abertura e consulta de chamados; painel técnico; atribuição de responsáveis; filtros; histórico cronológico; atualização de status e resposta; confirmação de abertura e acompanhamento periódico.
+**Implementado:** autenticação de clientes, técnicos e administradores; cadastro técnico com acesso imediato; gestão administrativa de acesso técnico; abertura e consulta de chamados; painel técnico; atribuição de responsáveis; filtros; histórico cronológico; atualização de status e resposta; confirmação de abertura e acompanhamento periódico; testes automatizados de validação e integração da API.
 
-**Planejado ou pendente de evolução:** perfil de funcionários, edição de perfil, anexos, notificações em tempo real, recuperação de senha, autenticação multifator, auditoria ampliada, testes automatizados e aplicativo móvel.
+**Planejado ou pendente de evolução:** perfil de funcionários, edição de perfil, anexos, notificações em tempo real, recuperação de senha, autenticação multifator, auditoria ampliada e aplicativo móvel.
 
 A atualização automática atual utiliza *polling* a cada 15 segundos enquanto a tela está aberta. Isso não equivale a notificações push, e-mail ou comunicação em tempo real por WebSocket.
 

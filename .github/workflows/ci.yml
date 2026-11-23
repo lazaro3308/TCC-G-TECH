@@ -2,7 +2,7 @@ name: G-TECH CI
 
 on:
   pull_request:
-    branches: [main, 'feat/**']
+    branches: [main, 'feat/**', 'fix/**']
   push:
     branches: [main]
 
@@ -28,8 +28,27 @@ jobs:
         run: npm run build --prefix client
 
   server:
-    name: Verificação da API
+    name: Testes da API e integração MySQL
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -ppassword"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: password
+      DB_NAME: g_tech_suporte
+      JWT_SECRET: gtech-ci-secret-32-characters-minimum-for-tests
     steps:
       - name: Baixar repositório
         uses: actions/checkout@v4
@@ -41,8 +60,12 @@ jobs:
           cache-dependency-path: server/package-lock.json
       - name: Instalar dependências da API
         run: npm ci --prefix server
-      - name: Verificar sintaxe da API e scripts administrativos
+      - name: Verificar sintaxe e testes unitários
         run: |
           node --check server/index.js
+          node --check server/utils/validation.js
           node --check server/scripts/criar-admin.js
           node --check server/scripts/criar-tecnico.js
+          npm test --prefix server
+      - name: Testar cadastro, autenticação e chamados com MySQL
+        run: npm run test:integration --prefix server
