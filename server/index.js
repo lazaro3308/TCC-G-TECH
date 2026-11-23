@@ -96,16 +96,31 @@ function issueSession(res, user) {
   res.cookie("gtech_session", token, cookie);
 }
 
-function auth(req, res, next) {
+async function auth(req, res, next) {
+  let payload;
   try {
-    const payload = jwt.verify(req.cookies.gtech_session, secret, {
+    payload = jwt.verify(req.cookies.gtech_session, secret, {
       issuer: "gtech-api",
       audience: "gtech-client",
     });
-    req.user = { id: +payload.sub, perfil: payload.perfil };
-    next();
   } catch {
     return res.status(401).json({ mensagem: "Faça login novamente." });
+  }
+
+  try {
+    const [rows] = await db.execute(
+      "SELECT id,perfil,ativo FROM usuarios WHERE id=? LIMIT 1",
+      [Number(payload.sub)],
+    );
+    const current = rows[0];
+    if (!current || !current.ativo || current.perfil !== payload.perfil) {
+      return res.status(401).json({ mensagem: "Conta indisponível. Faça login novamente." });
+    }
+    req.user = { id: Number(current.id), perfil: current.perfil };
+    return next();
+  } catch (error) {
+    console.error("Validação de sessão:", error.code);
+    return res.status(503).json({ mensagem: "Não foi possível validar sua sessão no momento." });
   }
 }
 
