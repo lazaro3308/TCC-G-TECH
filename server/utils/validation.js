@@ -3,7 +3,7 @@ const priorities = ["Baixa", "Normal", "Alta", "Urgente"];
 function isValidEmail(email) {
   return typeof email === "string" &&
     email.length <= 190 &&
-    /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 function validateTicketPayload(body) {
