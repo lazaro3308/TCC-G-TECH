@@ -110,3 +110,10 @@ export function saveTickets() { /* Chamados são persistidos exclusivamente pela
 export function updateProfile() {
   throw new Error("Atualização de perfil será habilitada por endpoint autenticado.");
 }
+
+export async function setTechnicianActive(id, ativo) {
+  return apiRequest("/admin/tecnicos/" + encodeURIComponent(id), {
+    method: "PATCH",
+    body: JSON.stringify({ ativo }),
+  });
+}
