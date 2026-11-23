@@ -41,5 +41,8 @@ jobs:
           cache-dependency-path: server/package-lock.json
       - name: Instalar dependências da API
         run: npm ci --prefix server
-      - name: Verificar sintaxe da API
-        run: node --check server/index.js
+      - name: Verificar sintaxe da API e scripts administrativos
+        run: |
+          node --check server/index.js
+          node --check server/scripts/criar-admin.js
+          node --check server/scripts/criar-tecnico.js

@@ -58,6 +58,14 @@ Solicitações de suporte podem ficar difíceis de acompanhar quando são regist
 - Acompanhamento do status e da resposta técnica.
 - Atualização periódica da lista e da tela de confirmação enquanto a página está aberta.
 
+### Cadastro e administração de técnicos
+
+- Solicitação pública de cadastro técnico, sem liberação imediata.
+- Aprovação ou recusa por administrador autenticado.
+- Criação da conta técnica somente após aprovação.
+- Consulta da equipe e ativação/desativação de contas técnicas.
+- Primeiro administrador provisionado por script local, sem cadastro público.
+
 ### Painel técnico
 
 - Acesso por conta técnica previamente criada.
@@ -151,7 +159,7 @@ cd TCC-G-TECH
 2. Abra o phpMyAdmin ou outro cliente MySQL.
 3. Importe e execute `server/database/schema.sql`.
 4. O script prepara o banco `g_tech_suporte` e as tabelas utilizadas pela aplicação.
-5. **Banco já existente:** faça um backup antes de qualquer alteração. Execute novamente o `server/database/schema.sql` atualizado para criar tabelas que ainda não existam (o script usa `CREATE TABLE IF NOT EXISTS` e não atualiza a estrutura de tabelas já criadas). Em seguida, execute, nesta ordem, `server/database/migrations/001_indice_fila_tecnica.sql` e `server/database/migrations/002_historico_mensagem_texto.sql`. Essas migrações adicionam o índice da fila técnica e ampliam o campo de mensagem do histórico, sem apagar os registros existentes.
+5. **Banco já existente:** faça um backup antes de qualquer alteração. Execute, nesta ordem, `server/database/migrations/001_indice_fila_tecnica.sql`, `002_historico_mensagem_texto.sql` e `003_aprovacao_tecnicos.sql`. A terceira migração adiciona o perfil administrativo e a tabela de solicitações, preservando os registros existentes. Não é necessário recriar o banco.
 
 ### 3. Configurar a API
 
@@ -192,7 +200,17 @@ npm run create:technician
 
 O script solicita nome, e-mail e senha. A senha deve ter pelo menos 12 caracteres. O cadastro público cria contas de cliente; contas técnicas são provisionadas por esse comando.
 
-### 5. Iniciar o front-end
+### 5. Criar o primeiro administrador
+
+Depois de aplicar a migração 003 e configurar a API, execute em outro terminal, dentro de `server`:
+
+```powershell
+npm run create:admin
+```
+
+O script cria o primeiro administrador e bloqueia novas criações quando já existe um. Consulte [Administração e aprovação de técnicos](docs/ADMINISTRACAO-E-APROVACAO-TECNICOS.md) para o fluxo completo.
+
+### 6. Iniciar o front-end
 
 Em outro terminal, a partir da raiz do projeto:
 
@@ -206,7 +224,7 @@ Acesse o endereço local informado pelo Vite (normalmente `http://localhost:5173
 
 Se o Vite utilizar outra porta, ajuste `CLIENT_ORIGIN` no arquivo `server/.env` para corresponder exatamente à origem exibida e reinicie a API.
 
-### 6. Gerar o build do front-end
+### 7. Gerar o build do front-end
 
 Na raiz do repositório, com as dependências instaladas:
 
@@ -222,7 +240,12 @@ O comando executa o script de build do cliente.
 |---|---|---|
 | GET | `/health` | Verificar disponibilidade da API |
 | POST | `/auth/register` | Cadastrar cliente |
-| POST | `/auth/login` | Autenticar cliente ou técnico |
+| POST | `/auth/register-technician` | Solicitar cadastro técnico |
+| GET | `/admin/solicitacoes` | Listar solicitações como administrador |
+| PATCH | `/admin/solicitacoes/:id` | Aprovar ou recusar solicitação |
+| GET | `/admin/tecnicos` | Listar equipe técnica |
+| PATCH | `/admin/tecnicos/:id` | Ativar ou desativar técnico |
+| POST | `/auth/login` | Autenticar cliente, técnico ou administrador |
 | POST | `/auth/logout` | Encerrar sessão |
 | GET | `/auth/me` | Consultar usuário autenticado |
 | POST | `/chamados` | Criar chamado como cliente |
@@ -237,6 +260,7 @@ O comando executa o script de build do cliente.
 O repositório inclui documentos complementares:
 
 - [Autenticação e painel técnico](docs/AUTENTICACAO-E-PAINEL-TECNICO.md)
+- [Administração e aprovação de técnicos](docs/ADMINISTRACAO-E-APROVACAO-TECNICOS.md)
 - [Requisitos e regras de negócio](docs/REQUISITOS-E-REGRAS.md)
 - [Modelagem de dados](docs/MODELAGEM-DE-DADOS.md)
 - [Fluxos e arquitetura](docs/FLUXOS-E-ARQUITETURA.md)
@@ -245,9 +269,9 @@ O repositório inclui documentos complementares:
 
 ## 📌 Estado atual e próximas etapas
 
-**Implementado:** autenticação de clientes e técnicos, abertura e consulta de chamados, painel técnico, atribuição de responsáveis, filtros por status/prioridade/técnico, histórico cronológico, atualização de status e resposta, confirmação de abertura e acompanhamento periódico.
+**Implementado:** autenticação de clientes, técnicos e administradores; solicitação e aprovação de cadastro técnico; gestão de acesso técnico; abertura e consulta de chamados; painel técnico; atribuição de responsáveis; filtros; histórico cronológico; atualização de status e resposta; confirmação de abertura e acompanhamento periódico.
 
-**Planejado ou pendente de evolução:** perfis administrativos e de funcionários, edição de perfil, anexos, notificações em tempo real, recuperação de senha, autenticação multifator, auditoria ampliada, testes automatizados e aplicativo móvel.
+**Planejado ou pendente de evolução:** perfil de funcionários, edição de perfil, anexos, notificações em tempo real, recuperação de senha, autenticação multifator, auditoria ampliada, testes automatizados e aplicativo móvel.
 
 A atualização automática atual utiliza *polling* a cada 15 segundos enquanto a tela está aberta. Isso não equivale a notificações push, e-mail ou comunicação em tempo real por WebSocket.
 

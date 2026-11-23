@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
   senha_hash VARCHAR(255) NOT NULL,
   empresa VARCHAR(160) NULL,
   telefone VARCHAR(30) NULL,
-  perfil ENUM('cliente','tecnico') NOT NULL DEFAULT 'cliente',
+  perfil ENUM('cliente','tecnico','admin') NOT NULL DEFAULT 'cliente',
   ativo TINYINT(1) NOT NULL DEFAULT 1,
   criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   atualizado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -46,4 +46,21 @@ CREATE TABLE IF NOT EXISTS historico_chamados (
   CONSTRAINT fk_historico_chamado FOREIGN KEY (chamado_id) REFERENCES chamados(id) ON DELETE CASCADE,
   CONSTRAINT fk_historico_autor FOREIGN KEY (autor_id) REFERENCES usuarios(id),
   INDEX idx_historico_chamado_data (chamado_id, criado_em)
+) ENGINE=InnoDB;
+
+
+CREATE TABLE IF NOT EXISTS solicitacoes_tecnicos (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(120) NOT NULL,
+  email VARCHAR(190) NOT NULL,
+  senha_hash VARCHAR(255) NOT NULL,
+  telefone VARCHAR(30) NULL,
+  status ENUM('pendente','aprovada','recusada') NOT NULL DEFAULT 'pendente',
+  analisado_por BIGINT UNSIGNED NULL,
+  analisado_em TIMESTAMP NULL,
+  motivo_recusa VARCHAR(500) NULL,
+  criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_solicitacao_admin FOREIGN KEY (analisado_por) REFERENCES usuarios(id),
+  INDEX idx_solicitacoes_status_data (status, criado_em),
+  UNIQUE KEY uq_solicitacoes_tecnicos_email (email)
 ) ENGINE=InnoDB;
