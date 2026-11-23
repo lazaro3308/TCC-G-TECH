@@ -34,6 +34,24 @@ export async function registerClient(data) {
   saveSession(user);
   return user;
 }
+export async function requestTechnicianAccount(data) {
+  return apiRequest("/auth/register-technician", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+export async function getTechnicianRequests(status = "pendente") {
+  return (await apiRequest("/admin/solicitacoes?status=" + encodeURIComponent(status))).solicitacoes || [];
+}
+export async function decideTechnicianRequest(id, decisao, motivo = "") {
+  return apiRequest("/admin/solicitacoes/" + encodeURIComponent(id), {
+    method: "PATCH",
+    body: JSON.stringify({ decisao, motivo }),
+  });
+}
+export async function getAdminTechnicians() {
+  return (await apiRequest("/admin/tecnicos")).tecnicos || [];
+}
 export async function restoreSession() {
   const data = await apiRequest("/auth/me");
   const user = { ...data.usuario, name: data.usuario.nome };
