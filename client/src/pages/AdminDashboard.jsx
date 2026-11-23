@@ -1,6 +1,6 @@
 import React,{useCallback,useEffect,useState} from "react";
 import {Check, X, RefreshCw, ShieldCheck, LogOut, Users, Clock3} from "lucide-react";
-import {decideTechnicianRequest,getAdminTechnicians,getTechnicianRequests} from "../services/api.js";
+import {decideTechnicianRequest,getAdminTechnicians,getTechnicianRequests,setTechnicianActive} from "../services/api.js";
 
 export default function AdminDashboard({user,onLogout}){
   const [requests,setRequests]=useState([]);
@@ -19,6 +19,15 @@ export default function AdminDashboard({user,onLogout}){
     finally{setBusy(false);}
   },[filter]);
   useEffect(()=>{load();},[load]);
+
+  async function toggleTechnician(person){
+    setBusy(true);setError("");setNotice("");
+    try{
+      const result=await setTechnicianActive(person.id,!Boolean(person.ativo));
+      setNotice(result.mensagem);await load();
+    }catch(err){setError(err.message||"Não foi possível alterar o acesso do técnico.");}
+    finally{setBusy(false);}
+  }
 
   async function decide(request,decision){
     let motivo="";
@@ -69,6 +78,7 @@ export default function AdminDashboard({user,onLogout}){
         <div className="tech-tools"><h2>Equipe técnica</h2></div>
         <div className="tech-list">{technicians.length===0?<p className="tech-empty">Nenhum técnico cadastrado.</p>:technicians.map(person=><article className="tech-ticket" key={person.id}>
           <div className="tech-ticket-head"><div><h2>{person.nome}</h2><p>{person.email}</p></div><span className="tech-priority">{person.ativo?"Ativo":"Inativo"}</span></div>
+          <div className="tech-ticket-actions"><button disabled={busy} onClick={()=>toggleTechnician(person)}>{person.ativo?"Desativar acesso":"Reativar acesso"}</button></div>
         </article>)}</div>
       </section>
       <p className="tech-foot"><ShieldCheck size={15}/> Área restrita. Somente contas administrativas podem aprovar solicitações.</p>
