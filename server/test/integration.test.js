@@ -118,6 +118,18 @@ async function main() {
     assert.equal(technicianPayload.usuario.perfil, "tecnico");
     const technicianCookie = cookieFrom(technicianResponse);
 
+    const technicianLogin = await fetch(baseUrl + "/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: "tecnico.integracao@gtech.test",
+        senha: "SenhaTecnico123!",
+        perfil: "tecnico",
+      }),
+    });
+    await expectStatus(technicianLogin, 200);
+    assert.equal((await technicianLogin.json()).usuario.perfil, "tecnico");
+
     const queueResponse = await fetch(baseUrl + "/chamados", {
       headers: { Cookie: technicianCookie },
     });
@@ -149,8 +161,12 @@ async function main() {
 
     console.log("Integração aprovada: cadastro de cliente, abertura de chamado, cadastro/login direto de técnico, fila técnica, duplicidade e política de origem.");
   } finally {
-    child.kill("SIGTERM");
-    await new Promise(resolve => child.once("exit", resolve));
+    if (child.exitCode === null) {
+      await new Promise(resolve => {
+        child.once("exit", resolve);
+        child.kill("SIGTERM");
+      });
+    }
     if (logs && process.env.DEBUG_INTEGRATION === "1") console.log(logs);
   }
 }
