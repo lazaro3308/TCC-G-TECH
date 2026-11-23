@@ -12,7 +12,7 @@ const { stdin: input, stdout: output } = require("node:process");
   rl.close();
 
   if (nome.length < 2 || nome.length > 120 ||
-      !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email) ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
       senha.length < 12 || senha.length > 128) {
     console.error("Dados inválidos. Confira nome, e-mail e senha.");
     process.exit(1);
