@@ -2,6 +2,7 @@ const { spawn } = require("node:child_process");
 const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
 const mysql = require("mysql2/promise");
+const bcrypt = require("bcryptjs");
 const assert = require("node:assert/strict");
 
 const root = join(__dirname, "..");
@@ -46,6 +47,18 @@ async function main() {
   });
   try {
     await connection.query(readFileSync(join(root, "database", "schema.sql"), "utf8"));
+    const pendingHash = await bcrypt.hash("SenhaPendente123!", 12);
+    await connection.execute(
+      "INSERT INTO solicitacoes_tecnicos(nome,email,senha_hash,telefone,status) VALUES(?,?,?,?, 'pendente')",
+      ["Técnico Migrado", "tecnico.migrado@gtech.test", pendingHash, null],
+    );
+    await connection.query(readFileSync(join(root, "database", "migrations", "004_ativar_solicitacoes_tecnicos.sql"), "utf8"));
+    const [migrated] = await connection.execute(
+      "SELECT perfil,ativo FROM usuarios WHERE email=? LIMIT 1",
+      ["tecnico.migrado@gtech.test"],
+    );
+    assert.equal(migrated[0]?.perfil, "tecnico");
+    assert.equal(Number(migrated[0]?.ativo), 1);
   } finally {
     await connection.end();
   }
@@ -72,6 +85,17 @@ async function main() {
 
   try {
     await waitForServer(child);
+
+    const migratedLogin = await fetch(baseUrl + "/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: "tecnico.migrado@gtech.test",
+        senha: "SenhaPendente123!",
+        perfil: "tecnico",
+      }),
+    });
+    await expectStatus(migratedLogin, 200);
 
     const customerResponse = await fetch(baseUrl + "/auth/register", {
       method: "POST",
