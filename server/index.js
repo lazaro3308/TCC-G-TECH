@@ -114,6 +114,11 @@ const technician = (req, res, next) =>
     ? next()
     : res.status(403).json({ mensagem: "Acesso exclusivo da equipe técnica." });
 
+const administrator = (req, res, next) =>
+  req.user.perfil === "admin"
+    ? next()
+    : res.status(403).json({ mensagem: "Acesso exclusivo da administração." });
+
 function ticketLookup(id) {
   const value = String(id || "");
   if (/^\d+$/.test(value)) return { sql: "c.id = ?", value: Number(value) };
@@ -163,9 +168,53 @@ app.post("/auth/register", authLimit, async (req, res) => {
   }
 });
 
+
+app.post("/auth/register-technician", authLimit, async (req, res) => {
+  const { nome, email, senha, telefone } = req.body || {};
+  if (
+    typeof nome !== "string" || nome.trim().length < 2 || nome.length > 120 ||
+    !emailOK(email) ||
+    typeof senha !== "string" || senha.length < 12 || senha.length > 128 ||
+    (telefone != null && (typeof telefone !== "string" || telefone.length > 30))
+  ) {
+    return res.status(400).json({ mensagem: "Informe nome, e-mail válido e senha entre 12 e 128 caracteres." });
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+  try {
+    const [users] = await db.execute("SELECT id FROM usuarios WHERE email=? LIMIT 1", [normalizedEmail]);
+    if (users.length) return res.status(409).json({ mensagem: "Este e-mail já possui uma conta." });
+
+    const [existing] = await db.execute(
+      "SELECT id,status FROM solicitacoes_tecnicos WHERE email=? LIMIT 1",
+      [normalizedEmail],
+    );
+    if (existing[0] && existing[0].status !== "recusada") {
+      return res.status(409).json({ mensagem: "Já existe uma solicitação para este e-mail." });
+    }
+
+    const passwordHash = await bcrypt.hash(senha, 12);
+    if (existing[0]) {
+      await db.execute(
+        "UPDATE solicitacoes_tecnicos SET nome=?,senha_hash=?,telefone=?,status='pendente',analisado_por=NULL,analisado_em=NULL,motivo_recusa=NULL WHERE id=?",
+        [nome.trim(), passwordHash, telefone || null, existing[0].id],
+      );
+    } else {
+      await db.execute(
+        "INSERT INTO solicitacoes_tecnicos(nome,email,senha_hash,telefone) VALUES(?,?,?,?)",
+        [nome.trim(), normalizedEmail, passwordHash, telefone || null],
+      );
+    }
+    return res.status(201).json({ mensagem: "Solicitação enviada. Aguarde a aprovação do administrador." });
+  } catch (error) {
+    console.error("Solicitação de técnico:", error.code);
+    return res.status(500).json({ mensagem: "Não foi possível enviar a solicitação." });
+  }
+});
+
 app.post("/auth/login", authLimit, async (req, res) => {
   const { email, senha, perfil } = req.body || {};
-  if (!emailOK(email) || typeof senha !== "string" || !["cliente", "tecnico"].includes(perfil)) {
+  if (!emailOK(email) || typeof senha !== "string" || !["cliente", "tecnico", "admin"].includes(perfil)) {
     return res.status(400).json({ mensagem: "Dados inválidos." });
   }
 
@@ -214,6 +263,94 @@ app.get("/auth/me", auth, async (req, res) => {
   }
 });
 
+
+app.get("/admin/solicitacoes", auth, administrator, async (req, res) => {
+  const status = typeof req.query.status === "string" ? req.query.status : "pendente";
+  if (!["pendente", "aprovada", "recusada", "todas"].includes(status)) {
+    return res.status(400).json({ mensagem: "Filtro de solicitações inválido." });
+  }
+  try {
+    const [rows] = await db.execute(
+      `SELECT s.id,s.nome,s.email,s.telefone,s.status,s.criado_em,s.analisado_em,
+              s.motivo_recusa,u.nome AS administrador_nome
+       FROM solicitacoes_tecnicos s
+       LEFT JOIN usuarios u ON u.id=s.analisado_por
+       ${status === "todas" ? "" : "WHERE s.status=?"}
+       ORDER BY FIELD(s.status,'pendente','aprovada','recusada'),s.criado_em DESC`,
+      status === "todas" ? [] : [status],
+    );
+    return res.json({ solicitacoes: rows });
+  } catch (error) {
+    console.error("Solicitações administrativas:", error.code);
+    return res.status(500).json({ mensagem: "Falha ao consultar solicitações." });
+  }
+});
+
+app.patch("/admin/solicitacoes/:id", auth, administrator, async (req, res) => {
+  const id = Number(req.params.id);
+  const { decisao, motivo } = req.body || {};
+  if (!Number.isSafeInteger(id) || id < 1 || !["aprovar", "recusar"].includes(decisao) ||
+      (motivo != null && (typeof motivo !== "string" || motivo.length > 500))) {
+    return res.status(400).json({ mensagem: "Decisão ou identificação inválida." });
+  }
+
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+    const [requests] = await connection.execute(
+      "SELECT * FROM solicitacoes_tecnicos WHERE id=? FOR UPDATE", [id],
+    );
+    const request = requests[0];
+    if (!request || request.status !== "pendente") {
+      await connection.rollback();
+      return res.status(404).json({ mensagem: "Solicitação pendente não encontrada." });
+    }
+
+    if (decisao === "aprovar") {
+      const [existing] = await connection.execute(
+        "SELECT id FROM usuarios WHERE email=? LIMIT 1", [request.email],
+      );
+      if (existing.length) {
+        await connection.rollback();
+        return res.status(409).json({ mensagem: "Este e-mail já está cadastrado. A solicitação não foi aprovada." });
+      }
+      await connection.execute(
+        "INSERT INTO usuarios(nome,email,senha_hash,telefone,perfil,ativo) VALUES(?,?,?,?,'tecnico',1)",
+        [request.nome, request.email, request.senha_hash, request.telefone],
+      );
+      await connection.execute(
+        "UPDATE solicitacoes_tecnicos SET status='aprovada',analisado_por=?,analisado_em=CURRENT_TIMESTAMP,motivo_recusa=NULL WHERE id=?",
+        [req.user.id, id],
+      );
+    } else {
+      await connection.execute(
+        "UPDATE solicitacoes_tecnicos SET status='recusada',analisado_por=?,analisado_em=CURRENT_TIMESTAMP,motivo_recusa=? WHERE id=?",
+        [req.user.id, motivo?.trim() || null, id],
+      );
+    }
+    await connection.commit();
+    return res.json({ mensagem: decisao === "aprovar" ? "Técnico aprovado e liberado para acesso." : "Solicitação recusada." });
+  } catch (error) {
+    await connection.rollback();
+    console.error("Decisão administrativa:", error.code);
+    return res.status(500).json({ mensagem: "Não foi possível processar a solicitação." });
+  } finally {
+    connection.release();
+  }
+});
+
+app.get("/admin/tecnicos", auth, administrator, async (_req, res) => {
+  try {
+    const [rows] = await db.execute(
+      "SELECT id,nome,email,telefone,ativo,criado_em FROM usuarios WHERE perfil='tecnico' ORDER BY nome ASC",
+    );
+    return res.json({ tecnicos: rows });
+  } catch (error) {
+    console.error("Lista administrativa de técnicos:", error.code);
+    return res.status(500).json({ mensagem: "Falha ao consultar técnicos." });
+  }
+});
+
 app.post("/chamados", auth, async (req, res) => {
   if (req.user.perfil !== "cliente") {
     return res.status(403).json({ mensagem: "Somente clientes podem abrir chamados." });
@@ -231,9 +368,12 @@ app.post("/chamados", auth, async (req, res) => {
 
   const codigo = "GT-" + new Date().getFullYear() + "-" +
     crypto.randomBytes(4).toString("hex").toUpperCase();
-  const connection = await db.getConnection();
+  let connection;
+  let transactionStarted = false;
   try {
+    connection = await db.getConnection();
     await connection.beginTransaction();
+    transactionStarted = true;
     const [result] = await connection.execute(
       "INSERT INTO chamados(codigo,cliente_id,titulo,categoria,prioridade,descricao) VALUES(?,?,?,?,?,?)",
       [codigo, req.user.id, titulo.trim(), categoria.trim(), prioridade, descricao.trim()],
@@ -243,6 +383,7 @@ app.post("/chamados", auth, async (req, res) => {
       [result.insertId, req.user.id, "Chamado aberto pelo cliente."],
     );
     await connection.commit();
+    transactionStarted = false;
     return res.status(201).json({
       chamado: {
         id: result.insertId,
@@ -255,11 +396,18 @@ app.post("/chamados", auth, async (req, res) => {
       },
     });
   } catch (error) {
-    await connection.rollback();
-    console.error("Chamado:", error.code);
-    return res.status(500).json({ mensagem: "Não foi possível registrar o chamado." });
+    if (connection && transactionStarted) await connection.rollback();
+    console.error("Chamado:", error.code || error.message);
+    const message = error.code === "ER_NO_SUCH_TABLE"
+      ? "Estrutura do banco incompleta: verifique as tabelas chamados e historico_chamados."
+      : error.code === "ER_NO_REFERENCED_ROW_2"
+        ? "O cliente da sessão não foi encontrado no banco. Entre novamente."
+        : error.code === "ER_BAD_FIELD_ERROR"
+          ? "A estrutura da tabela chamados está desatualizada. É necessária uma migração."
+          : "Não foi possível registrar o chamado. Verifique a conexão com o banco e tente novamente.";
+    return res.status(500).json({ mensagem: message });
   } finally {
-    connection.release();
+    if (connection) connection.release();
   }
 });
 
