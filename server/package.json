@@ -9,7 +9,7 @@
     "dev": "node --watch index.js",
     "create:technician": "node scripts/criar-tecnico.js",
     "create:admin": "node scripts/criar-admin.js",
-    "test": "node --test",
+    "test": "node --test test/validation.test.js",
     "test:integration": "node test/integration.test.js"
   },
   "dependencies": {
