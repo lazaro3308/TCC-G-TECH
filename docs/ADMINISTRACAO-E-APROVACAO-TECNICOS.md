@@ -18,7 +18,7 @@ A autenticação é verificada no servidor em cada requisição. Contas desativa
 
 ## Banco de dados existente
 
-O cadastro direto utiliza a tabela `usuarios` já existente e não exige apagar, recriar ou alterar os registros de clientes e chamados. A tabela histórica `solicitacoes_tecnicos`, criada pela migração 003, pode permanecer no banco sem interferir no novo fluxo.
+O cadastro direto utiliza a tabela `usuarios` já existente e não exige apagar, recriar ou alterar os registros de clientes e chamados. A tabela histórica `solicitacoes_tecnicos`, criada pela migração 003, pode permanecer no banco sem interferir no novo fluxo. Se houver solicitações pendentes antigas que devam ser convertidas em contas ativas, faça backup e execute uma vez `server/database/migrations/004_ativar_solicitacoes_tecnicos.sql` após a migração 003. A migração não sobrescreve contas existentes; solicitações cujo e-mail já pertença a um cliente permanecem sem conversão.
 
 Para instalações novas, utilize `server/database/schema.sql`. Para bancos existentes, faça backup antes de aplicar qualquer migração pendente, seguindo a ordem documentada no README.
 
