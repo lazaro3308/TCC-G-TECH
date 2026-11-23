@@ -1,11 +1,16 @@
 export const API_URL = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/+$/, "");
 
 export async function apiRequest(path, options = {}) {
-  const response = await fetch(API_URL + path, {
-    ...options,
-    credentials: "include",
-    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
-  });
+  let response;
+  try {
+    response = await fetch(API_URL + path, {
+      ...options,
+      credentials: "include",
+      headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+    });
+  } catch {
+    throw new Error("Não foi possível conectar à API. Confira se o servidor está ativo e se VITE_API_URL aponta para a porta correta.");
+  }
   if (response.status === 204) return null;
   const data = await response.json().catch(() => ({ mensagem: "Resposta inválida do servidor." }));
   if (!response.ok) throw new Error(data.mensagem || "Falha na comunicação com o servidor.");
@@ -35,10 +40,13 @@ export async function registerClient(data) {
   return user;
 }
 export async function requestTechnicianAccount(data) {
-  return apiRequest("/auth/register-technician", {
+  const result = await apiRequest("/auth/register-technician", {
     method: "POST",
     body: JSON.stringify(data),
   });
+  const user = { ...result.usuario, name: result.usuario.nome };
+  saveSession(user);
+  return { ...result, user };
 }
 export async function getTechnicianRequests(status = "pendente") {
   return (await apiRequest("/admin/solicitacoes?status=" + encodeURIComponent(status))).solicitacoes || [];
