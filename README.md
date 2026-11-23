@@ -158,7 +158,7 @@ cd TCC-G-TECH
 2. Abra o phpMyAdmin ou outro cliente MySQL.
 3. Importe e execute `server/database/schema.sql`.
 4. O script prepara o banco `g_tech_suporte` e as tabelas utilizadas pela aplicação.
-5. **Banco já existente:** faça um backup antes de qualquer alteração. Execute, nesta ordem, `server/database/migrations/001_indice_fila_tecnica.sql`, `002_historico_mensagem_texto.sql` e `003_aprovacao_tecnicos.sql`. A migração 003 habilita o perfil administrativo e cria uma tabela histórica de solicitações; ela pode permanecer no banco, mas não participa do cadastro técnico atual. Execute somente migrações ainda não aplicadas. Não é necessário recriar o banco nem apagar registros.
+5. **Banco já existente:** faça um backup antes de qualquer alteração. Execute, nesta ordem, `server/database/migrations/001_indice_fila_tecnica.sql`, `002_historico_mensagem_texto.sql` e `003_aprovacao_tecnicos.sql`. A migração 003 habilita o perfil administrativo e cria uma tabela histórica de solicitações; ela pode permanecer no banco, mas não participa do cadastro técnico atual. Execute somente migrações ainda não aplicadas. Se já existirem solicitações técnicas pendentes que devam virar contas ativas, execute também `004_ativar_solicitacoes_tecnicos.sql` após a 003. Essa migração preserva o histórico e não altera contas já existentes. Não é necessário recriar o banco nem apagar registros.
 
 ### 3. Configurar a API
 
