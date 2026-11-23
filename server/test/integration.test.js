@@ -10,6 +10,12 @@ const port = Number(process.env.TEST_PORT || 3317);
 const baseUrl = `http://127.0.0.1:${port}`;
 const jwtSecret = "gtech-integration-test-secret-32-characters-minimum";
 
+async function expectStatus(response, expected) {
+  if (response.status !== expected) {
+    throw new Error(`Esperado HTTP ${expected}, recebido ${response.status}: ${await response.text()}`);
+  }
+}
+
 function cookieFrom(response) {
   const cookies = response.headers.getSetCookie?.() || [];
   const session = cookies.find(value => value.startsWith("gtech_session="));
@@ -76,7 +82,7 @@ async function main() {
         senha: "SenhaCliente123!",
       }),
     });
-    assert.equal(customerResponse.status, 201, await customerResponse.text());
+    await expectStatus(customerResponse, 201);
     const customerCookie = cookieFrom(customerResponse);
 
     const ticketResponse = await fetch(baseUrl + "/chamados", {
@@ -93,7 +99,7 @@ async function main() {
         descricao: "O computador de teste não inicia após ser ligado.",
       }),
     });
-    assert.equal(ticketResponse.status, 201, await ticketResponse.text());
+    await expectStatus(ticketResponse, 201);
     const ticketPayload = await ticketResponse.json();
     assert.ok(ticketPayload.chamado.codigo.startsWith("GT-"));
 
@@ -107,7 +113,7 @@ async function main() {
         telefone: "38999990000",
       }),
     });
-    assert.equal(technicianResponse.status, 201, await technicianResponse.text());
+    await expectStatus(technicianResponse, 201);
     const technicianPayload = await technicianResponse.json();
     assert.equal(technicianPayload.usuario.perfil, "tecnico");
     const technicianCookie = cookieFrom(technicianResponse);
